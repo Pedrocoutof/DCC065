@@ -40,7 +40,9 @@ function updateWireframePreviewPosition() {
 }
 
 function updateWireframePreview() {
-    scene.remove(wireframePreview);
+    if (wireframePreview.parent) {
+        wireframePreview.parent.remove(wireframePreview);
+    }
 
     wireframePreview = new THREE.Group();
 
@@ -139,10 +141,27 @@ document.addEventListener('keydown', function(event) {
             updateWireframePreview();
             break;
         case 'KeyS':
-            saveScene('scene.txt', []);
+            saveScene('scene.json', voxels);
             break;
         case 'KeyL':
-            loadScene('scene.txt', []);
+            loadScene((newScene, loadedVoxels) => {
+                scene.clear();
+        
+                scene.add(gridHelper);
+                scene.add(groundPlane);
+                scene.add(light);
+                light = initDefaultBasicLight(scene);
+
+                loadedVoxels.forEach((voxel) => {
+                    scene.add(voxel);
+                });
+        
+                voxels = loadedVoxels;
+        
+                wireframePreview = new THREE.Group();
+                scene.add(wireframePreview);
+                updateWireframePreview();
+            });
             break;
     }
     updateWireframePreviewPosition();

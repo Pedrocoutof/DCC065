@@ -4,30 +4,35 @@ const v1 = {
     meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'brown' }),
     wireframe: new THREE.LineBasicMaterial({ color: 'brown' }),
     name: 'v1',
+    type: 'box'
 };
 
 const v2 = {
     meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'forestgreen' }),
     wireframe: new THREE.LineBasicMaterial({ color: 'forestgreen' }),
     name: 'v2',
+    type: 'box'
 };
 
 const v3 = {
     meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'yellow' }),
     wireframe: new THREE.LineBasicMaterial({ color: 'yellow' }),
-    name: 'v1',
+    name: 'v3',
+    type: 'box'
 };
 
 const v4 = {
     meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'purple' }),
     wireframe: new THREE.LineBasicMaterial({ color: 'purple' }),
-    name: 'v2',
+    name: 'v4',
+    type: 'box'
 };
 
 const v5 = {
     meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'black' }),
     wireframe: new THREE.LineBasicMaterial({ color: 'black' }),
-    name: 'v2',
+    name: 'v5',
+    type: 'box'
 };
 
 const generateTrunk = (MAX_HEIGHT = 3) => {
@@ -46,6 +51,7 @@ function createWireframe(geometry, material) {
 
 
 const tree1 = {
+    type: 'tree',
     create: function () {
         const group = new THREE.Group();
         const trunk = generateTrunk();
@@ -83,6 +89,7 @@ const tree1 = {
 };
 
 const tree2 = {
+    type: 'tree',
     create: function () {
         const group = new THREE.Group();
 
@@ -122,6 +129,7 @@ const tree2 = {
 };
 
 const tree3 = {
+    type: 'tree',
     create: function () {
         const group = new THREE.Group();
 
@@ -174,5 +182,12 @@ const tree3 = {
     name: 'tree3',
 };
 
+const getVoxelByName = function (name) {
+    for (let i = 0; i < voxelTypes.length; i++) {
+        if (voxelTypes[i].name === name) {
+            return voxelTypes[i];
+        }
+    }
+};
 
 export default [v1, v2, v3, v4, v5,tree1, tree2, tree3];
