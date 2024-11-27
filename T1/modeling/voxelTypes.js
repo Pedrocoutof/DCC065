@@ -12,6 +12,24 @@ const v2 = {
     name: 'v2',
 };
 
+const v3 = {
+    meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'yellow' }),
+    wireframe: new THREE.LineBasicMaterial({ color: 'yellow' }),
+    name: 'v1',
+};
+
+const v4 = {
+    meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'purple' }),
+    wireframe: new THREE.LineBasicMaterial({ color: 'purple' }),
+    name: 'v2',
+};
+
+const v5 = {
+    meshBasicMaterial: new THREE.MeshBasicMaterial({ color: 'black' }),
+    wireframe: new THREE.LineBasicMaterial({ color: 'black' }),
+    name: 'v2',
+};
+
 const generateTrunk = (MAX_HEIGHT = 3) => {
     const geometry = new THREE.BoxGeometry(1, MAX_HEIGHT, 1);
     const material = new THREE.MeshBasicMaterial({ color: 'brown' })
@@ -157,4 +175,4 @@ const tree3 = {
 };
 
 
-export default [v1, v2, tree1, tree2, tree3];
+export default [v1, v2, v3, v4, v5,tree1, tree2, tree3];

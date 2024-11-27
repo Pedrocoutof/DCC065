@@ -16,7 +16,7 @@ const SIZE_Y = 10;
 
 let scene, renderer, camera, light, orbit;
 let currentVoxelType = 0;
-let position = new THREE.Vector3(0, 0.5, 0);
+let position = new THREE.Vector3(0.5, 0.5, 0.5);
 let voxels = [];
 
 scene = new THREE.Scene();
