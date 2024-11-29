@@ -22,11 +22,19 @@ function distanceFromCenter(x, z) {
 }
 
 function calculateHeight(x, z) {
-    const distance = distanceFromCenter(x, z).x;
+    const amplitude = 5;
+    const frequency = (2 * Math.PI) / SIZE_X;
+    const valleyCenterZ = amplitude * Math.sin(frequency * x);
+
+    const distance = Math.abs(z - valleyCenterZ);
+
+    const maxDistance = 13;
+
+    const normalizedDistance = Math.min(distance / maxDistance, 1);
+
+    const height = 1 + (HEIGHT - 1) * Math.cos(normalizedDistance * (Math.PI / 2));
     
-    return distance <= 4 ? 1 :
-            distance <= 13 ? 2 :
-            HEIGHT;
+    return 4 - Math.max(Math.round(height), 1);
 }
 
 function generateGroundVoxelStyle() {
