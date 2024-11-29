@@ -18,9 +18,53 @@ material = setDefaultMaterial();
 light = initDefaultBasicLight(scene);
 orbit = new OrbitControls(camera, renderer.domElement);
 
-window.addEventListener('resize', function() {
-    onWindowResize(camera, renderer);
-}, false);
+let firstPersonCamera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1 );
+
+let activeCamera = camera;
+
+let firstPersonCameraVerticalRotation = 0;
+let firstPersonCameraHorizontalRotation = 0;
+
+window.addEventListener('keydown', (event) => {
+    if (event.key.toLowerCase() === 'c') {
+        if (activeCamera === camera) {
+            activeCamera = firstPersonCamera;
+            orbit.enabled = false;
+            document.body.requestPointerLock(); // função para travar e esconder o mouse no centro da página/elemento
+            firstPersonCameraVerticalRotation = cube.rotation.y;
+            firstPersonCameraHorizontalRotation = 0;
+        } else {
+            activeCamera = camera;
+            orbit.enabled = true;
+            document.exitPointerLock();
+        }
+    }
+});
+
+document.addEventListener('pointerlockchange', onPointerLockChange, false);
+
+function onPointerLockChange() {
+    if (document.pointerLockElement === document.body) {
+        document.addEventListener('mousemove', onMouseMove, false);
+    } else {
+        document.removeEventListener('mousemove', onMouseMove, false);
+    }
+}
+
+function onMouseMove(event) {
+    const movementX = event.movementX || 0;
+    const movementY = event.movementY || 0;
+
+    const sensitivity = 0.002;
+
+    firstPersonCameraVerticalRotation -= movementX * sensitivity;
+    firstPersonCameraHorizontalRotation -= movementY * sensitivity;
+
+    const maxfirstPersonCameraHorizontalRotation = Math.PI / 2 - 0.1;
+    const minfirstPersonCameraHorizontalRotation = -Math.PI / 2 + 0.1;
+
+    firstPersonCameraHorizontalRotation = Math.max(minfirstPersonCameraHorizontalRotation, Math.min(maxfirstPersonCameraHorizontalRotation, firstPersonCameraHorizontalRotation));
+}
 
 let axesHelper = new THREE.AxesHelper(12);
 scene.add(axesHelper);
@@ -35,7 +79,11 @@ let cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
 cube.position.set(0.0, 1, 0.0);
 scene.add(cube);
 
-let movementHandler = new MovementHandler(cube);
+function isFirstPerson() {
+    return activeCamera === firstPersonCamera;
+}
+
+let movementHandler = new MovementHandler(cube, firstPersonCamera, isFirstPerson);
 
 let controls = new InfoBox();
 controls.add("Basic Scene");
@@ -54,8 +102,18 @@ controls.show();
 
 function render() {
     movementHandler.handleMovement();
+
+    if (activeCamera === firstPersonCamera) {
+        firstPersonCamera.position.copy(cube.position);
+        firstPersonCamera.position.y += 0.5
+
+        firstPersonCamera.rotation.order = 'YXZ';
+        firstPersonCamera.rotation.y = firstPersonCameraVerticalRotation;
+        firstPersonCamera.rotation.x = firstPersonCameraHorizontalRotation;
+    }
+
     requestAnimationFrame(render);
-    renderer.render(scene, camera);
+    renderer.render(scene, activeCamera);
 }
 
 render();
