@@ -1,8 +1,9 @@
 import * as THREE from 'three';
+import CONSTS from 'consts';
 
-const SIZE_X = 35;
-const SIZE_Z = 35;
-const HEIGHT = 3;
+const SIZE_X = CONSTS.ground.width;
+const SIZE_Z = CONSTS.ground.depth;
+const HEIGHT = CONSTS.ground.height;
 
 const height_colors = ['green', 'saddlebrown', 'white'];
 
@@ -22,28 +23,34 @@ function distanceFromCenter(x, z) {
 }
 
 function calculateHeight(x, z) {
-    const amplitude = 5;
-    const frequency = (2 * Math.PI) / SIZE_X;
-    const valleyCenterZ = amplitude * Math.sin(frequency * x);
+    const amplitude = 3;
+    const frequency = (2 * Math.PI) / SIZE_Z;
+    const valleyCenter = amplitude * Math.sin(frequency * z);
 
-    const distance = Math.abs(z - valleyCenterZ);
+    const distance = Math.abs(x - valleyCenter);
+    console.log(distance);
 
-    const maxDistance = 13;
+    return distance < 3 ? 1 :
+        distance < 12 ? 2 :
+        3;
 
-    const normalizedDistance = Math.min(distance / maxDistance, 1);
+    // const maxDistance = 10;
 
-    const height = 1 + (HEIGHT - 1) * Math.cos(normalizedDistance * (Math.PI / 2));
+    // const normalizedDistance = Math.min(distance / maxDistance, 1);
+
+    // const exponent = 0.5;
+    // const height = 1 + (HEIGHT - 1) * Math.pow(Math.cos(normalizedDistance * (Math.PI / 2)), exponent);
     
-    return 4 - Math.max(Math.round(height), 1);
+    // return (HEIGHT + 1) - Math.max(Math.round(height), 1);
 }
 
 function generateGroundVoxelStyle() {
     const group = new THREE.Group();
 
-    const voxelSize = 1;
     const halfSizeX = SIZE_X / 2;
     const halfSizeZ = SIZE_Z / 2;
 
+    const voxelSize = 1;
     const voxelGeometry = new THREE.BoxGeometry(voxelSize, voxelSize, voxelSize);
 
     for (let x = -halfSizeX; x < halfSizeX; x += voxelSize) {
@@ -51,7 +58,7 @@ function generateGroundVoxelStyle() {
             const height = calculateHeight(x, z);
 
             for (let y = 0; y < height; y++) {
-                const voxelMaterial = new THREE.MeshLambertMaterial({ color: height_colors[y] });
+                const voxelMaterial = new THREE.MeshToonMaterial({ color: height_colors[y] });
                 const voxel = new THREE.Mesh(voxelGeometry, voxelMaterial);
                 voxel.position.set(x + voxelSize / 2, y * voxelSize, z + voxelSize / 2);
                 voxel.castShadow = true;
