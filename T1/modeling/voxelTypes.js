@@ -35,13 +35,13 @@ const v5 = {
     type: 'box'
 };
 
-const generateTrunk = (MAX_HEIGHT = 3) => {
+export const generateTrunk = (MAX_HEIGHT = 3) => {
     const geometry = new THREE.BoxGeometry(1, MAX_HEIGHT, 1);
     const material = new THREE.MeshBasicMaterial({ color: 'brown' })
     return new THREE.Mesh(geometry, material);
 }
 
-function createWireframe(geometry, material) {
+export function createWireframe(geometry, material) {
     const wireframe = new THREE.LineSegments(
         new THREE.EdgesGeometry(geometry),
         material

@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import CONSTS from 'consts';
+import { setDefaultMaterial } from "../../libs/util/util.js";
 
 const SIZE_X = CONSTS.ground.width;
 const SIZE_Z = CONSTS.ground.depth;
@@ -28,20 +29,10 @@ function calculateHeight(x, z) {
     const valleyCenter = amplitude * Math.sin(frequency * z);
 
     const distance = Math.abs(x - valleyCenter);
-    console.log(distance);
 
     return distance < 3 ? 1 :
         distance < 12 ? 2 :
         3;
-
-    // const maxDistance = 10;
-
-    // const normalizedDistance = Math.min(distance / maxDistance, 1);
-
-    // const exponent = 0.5;
-    // const height = 1 + (HEIGHT - 1) * Math.pow(Math.cos(normalizedDistance * (Math.PI / 2)), exponent);
-    
-    // return (HEIGHT + 1) - Math.max(Math.round(height), 1);
 }
 
 function generateGroundVoxelStyle() {
@@ -58,7 +49,7 @@ function generateGroundVoxelStyle() {
             const height = calculateHeight(x, z);
 
             for (let y = 0; y < height; y++) {
-                const voxelMaterial = new THREE.MeshToonMaterial({ color: height_colors[y] });
+                const voxelMaterial = new setDefaultMaterial(height_colors[y]);
                 const voxel = new THREE.Mesh(voxelGeometry, voxelMaterial);
                 voxel.position.set(x + voxelSize / 2, y * voxelSize, z + voxelSize / 2);
                 voxel.castShadow = true;
