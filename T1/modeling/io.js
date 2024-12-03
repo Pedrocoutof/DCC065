@@ -1,6 +1,6 @@
 
 import * as THREE from 'three';
-import { generateTrunk } from './voxelTypes.js';
+import voxelTypes from './voxelTypes.js';
 
 
 // Função para salvar a cena
@@ -17,15 +17,14 @@ export function saveScene(filename, voxels) {
             materialProps: voxel.material
                 ? { color: voxel.material.color.getHex() }
                 : { color: 0xffffff },
+
         };
 
-        // Verifica o tipo de voxel (árvore ou bloco)
-        //console.log(voxel)
-        if (voxel.userData && voxel.userData.type === 'tree') {
-            voxelData.type = 'tree';
-            voxelData.treeName = voxel.userData.name; // Guarda o nome da árvore
+        if (voxel.additionalData) {
+            voxelData.additionalData = voxel.additionalData
         }
 
+        console.log(voxelData);
         return voxelData;
     });
 
@@ -48,33 +47,7 @@ export function loadScene(file, scene, helpers) {
       const loadedVoxels = [];
 
       json.forEach((voxelData) => {
-        if (voxelData.type === "tree") {
-          let tree;
-          switch (voxelData.treeName) {
-            case "tree1":
-              tree = createTree1();
-              break;
-            case "tree2":
-              tree = createTree2();
-              break;
-            case "tree3":
-              tree = createTree3();
-              break;
-            default:
-              tree = createTree3();
-              break;
-          }
-
-          if (tree) {
-            tree.position.set(
-              voxelData.position.x,
-              voxelData.position.y,
-              voxelData.position.z
-            );
-            loadedVoxels.push(tree);
-          }
-        } else {
-          // Carregar blocos normais
+        console.log(voxelData);
           const geometry = new THREE.BoxGeometry(1, 1, 1);
           const material = new THREE.MeshBasicMaterial(
             voxelData.materialProps || { color: 0xffffff }
@@ -86,7 +59,6 @@ export function loadScene(file, scene, helpers) {
             voxelData.position.z
           );
           loadedVoxels.push(mesh);
-        }
       });
 
       // Limpa e restaura a cena

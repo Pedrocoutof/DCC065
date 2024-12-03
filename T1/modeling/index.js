@@ -1,13 +1,13 @@
 import * as THREE from "three";
 import { OrbitControls } from "OrbitControls";
 import { controls } from "ui";
-import { generateTrunk, createWireframe } from "./voxelTypes.js";
 import { saveScene, loadScene } from "io";
 import {
   initRenderer,
   initCamera,
   createGroundPlaneXZ,
   initDefaultBasicLight,
+  setDefaultMaterial,
 } from "util";
 import voxelTypes from "./voxelTypes.js";
 import GUI from "../../libs/util/dat.gui.module.js";
@@ -47,70 +47,42 @@ function updateWireframePreview() {
   }
 
   wireframePreview = new THREE.Group();
+  let objCurrentVoxel = voxelTypes[currentVoxelType];
+  
+  const wireframeGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(objCurrentVoxel.width, objCurrentVoxel.height, objCurrentVoxel.depth))
+  const wireframeMaterial = new THREE.LineBasicMaterial({ color: objCurrentVoxel.color }),
+  wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
 
-  if (typeof voxelTypes[currentVoxelType].createWireframe === "function") {
-    const groupWireframe = voxelTypes[currentVoxelType].createWireframe();
-    wireframePreview.add(groupWireframe);
-  } else {
-    const wireframe = new THREE.LineSegments(
-      new THREE.EdgesGeometry(new THREE.BoxGeometry(1, 1, 1)),
-      voxelTypes[currentVoxelType].wireframe
-    );
-    wireframePreview.add(wireframe);
-  }
+  wireframePreview.add(wireframe);
 
   scene.add(wireframePreview);
   updateWireframePreviewPosition();
 }
 
 function addVoxel() {
-  let voxel;
+  let objCurrentVoxel = voxelTypes[currentVoxelType];
 
-  // Verifica se o tipo atual é uma entidade complexa (como uma árvore)
-  if (typeof voxelTypes[currentVoxelType].create === "function") {
-    voxel = voxelTypes[currentVoxelType].create();
-    voxel.isGroup = true;
+  const voxelGeometry = new THREE.BoxGeometry(objCurrentVoxel.width, objCurrentVoxel.height, objCurrentVoxel.depth);
+  const voxelMaterial = new setDefaultMaterial(objCurrentVoxel.color),
 
-    // Adiciona informações adicionais ao userData para árvores
-    voxel.userData = {
-      type: "tree",
-      name: voxelTypes[currentVoxelType].name, // Salva o tipo de árvore (tree1, tree2, etc.)
-    };
-  } else {
-    // Criação de voxel padrão (um bloco)
-    voxel = new THREE.Mesh(
-      new THREE.BoxGeometry(1, 1, 1),
-      voxelTypes[currentVoxelType].meshBasicMaterial
-    );
+  voxel = new THREE.Mesh(
+    voxelGeometry,
+    voxelMaterial
+  );
 
-    // Adiciona a wireframe ao voxel padrão
-    const wireframe = new THREE.LineSegments(
-      new THREE.EdgesGeometry(voxel.geometry),
-      voxelTypes[currentVoxelType].wireframe
-    );
-    voxel.add(wireframe);
-
-    // Adiciona informações adicionais ao userData para blocos
-    voxel.userData = {
-      type: "block",
-      name: voxelTypes[currentVoxelType].name, // Salva o tipo de voxel (v1, v2, etc.)
-    };
-  }
-
-  // Posiciona o voxel na cena
   voxel.position.set(position.x, position.y, position.z);
-
-  // Adiciona o voxel à cena
+  voxel.additionalData = objCurrentVoxel;
+  console.log(voxel);
   scene.add(voxel);
-
-  // Salva o voxel no array global para gerenciamento
   voxels.push(voxel);
+
+  console.log(voxels);
 }
-// Atualize o wireframe após o carregamento da cena
+
 function refreshWireframePreview() {
-  wireframePreview = new THREE.Group(); // Cria um novo grupo vazio
+  wireframePreview = new THREE.Group();
   scene.add(wireframePreview);
-  updateWireframePreview(); // Reaplica o wireframe com base no tipo atual
+  updateWireframePreview();
 }
 
 function simulateKeyPress(keyCode) {
@@ -118,22 +90,13 @@ function simulateKeyPress(keyCode) {
   document.dispatchEvent(event);
 }
 
-
 function removeVoxel() {
   const voxel = voxels.find((v) => {
-    if (v.isGroup) {
-      return (
-        v.position.x === position.x &&
-        v.position.y === position.y &&
-        v.position.z === position.z
-      );
-    } else {
-      return (
-        v.position.x === position.x &&
-        v.position.y === position.y &&
-        v.position.z === position.z
-      );
-    }
+    return (
+      v.position.x === position.x &&
+      v.position.y === position.y &&
+      v.position.z === position.z
+    );
   });
 
   if (voxel) {

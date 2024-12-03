@@ -6,8 +6,7 @@ import { initRenderer,
         initCamera,
         initDefaultBasicLight,
         setDefaultMaterial,
-        InfoBox,
-        onWindowResize } from 'util';
+        InfoBox } from 'util';
 
 let scene, renderer, camera, material, light, orbit;
 
