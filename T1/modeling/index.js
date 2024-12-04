@@ -34,11 +34,13 @@ const groundPlane = createGroundPlaneXZ(SIZE_X, SIZE_Z);
 scene.add(groundPlane);
 
 let wireframePreview = new THREE.Group();
+let textLabel;
 scene.add(wireframePreview);
 updateWireframePreview();
 
 function updateWireframePreviewPosition() {
   wireframePreview.position.set(position.x, position.y, position.z);
+  updateTextLabel();
 }
 
 function updateWireframePreview() {
@@ -48,35 +50,94 @@ function updateWireframePreview() {
 
   wireframePreview = new THREE.Group();
   let objCurrentVoxel = voxelTypes[currentVoxelType];
-  
-  const wireframeGeometry = new THREE.EdgesGeometry(new THREE.BoxGeometry(objCurrentVoxel.width, objCurrentVoxel.height, objCurrentVoxel.depth))
-  const wireframeMaterial = new THREE.LineBasicMaterial({ color: objCurrentVoxel.color }),
-  wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
+
+  const wireframeGeometry = new THREE.EdgesGeometry(
+    new THREE.BoxGeometry(
+      objCurrentVoxel.width,
+      objCurrentVoxel.height,
+      objCurrentVoxel.depth
+    )
+  );
+  const wireframeMaterial = new THREE.LineBasicMaterial({
+    color: objCurrentVoxel.color,
+  });
+  const wireframe = new THREE.LineSegments(wireframeGeometry, wireframeMaterial);
 
   wireframePreview.add(wireframe);
 
+  updateTextLabel();
   scene.add(wireframePreview);
   updateWireframePreviewPosition();
+}
+
+function updateTextLabel() {
+  if (textLabel && textLabel.parent) {
+    textLabel.parent.remove(textLabel);
+  }
+  const positionText = `x: ${position.x - 0.5}, y: ${position.y - 0.5}, z: ${position.z - 0.5}, name: ${voxelTypes[currentVoxelType].name}`;
+  textLabel = makeTextSprite(positionText);
+
+  const bbox = new THREE.Box3().setFromObject(wireframePreview);
+  const size = bbox.getSize(new THREE.Vector3());
+  textLabel.position.set(0, size.y + 0.1, 0);
+
+  wireframePreview.add(textLabel);
+}
+
+function makeTextSprite(message) {
+  let fontface = "Arial";
+  let fontsize = 18;
+  let borderThickness = 10;
+
+  let canvas = document.createElement("canvas");
+  let context = canvas.getContext("2d");
+  context.font = "Bold " + fontsize + "px " + fontface;
+
+  // Medir o texto
+  let metrics = context.measureText(message);
+  let textWidth = metrics.width;
+
+  // Configurar o canvas
+  canvas.width = textWidth + borderThickness * 2;
+  canvas.height = fontsize * 1.4 + borderThickness * 2;
+  context.font = "Bold " + fontsize + "px " + fontface;
+
+  // Fundo e borda
+  context.fillStyle = 'rgb(255,255,255)';
+  context.lineWidth = borderThickness;
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  context.strokeRect(0, 0, canvas.width, canvas.height);
+
+  // Texto
+  context.fillStyle = "rgba(0, 0, 0, 1.0)";
+  context.fillText(message, borderThickness, fontsize + borderThickness);
+
+  // Criar textura e Sprite
+  let texture = new THREE.Texture(canvas);
+  texture.needsUpdate = true;
+  let spriteMaterial = new THREE.SpriteMaterial({ map: texture });
+  let sprite = new THREE.Sprite(spriteMaterial);
+  sprite.scale.set(canvas.width / 100, canvas.height / 100, 1);
+  return sprite;
 }
 
 function addVoxel() {
   let objCurrentVoxel = voxelTypes[currentVoxelType];
 
-  const voxelGeometry = new THREE.BoxGeometry(objCurrentVoxel.width, objCurrentVoxel.height, objCurrentVoxel.depth);
-  const voxelMaterial = new setDefaultMaterial(objCurrentVoxel.color),
-
-  voxel = new THREE.Mesh(
-    voxelGeometry,
-    voxelMaterial
+  const voxelGeometry = new THREE.BoxGeometry(
+    objCurrentVoxel.width,
+    objCurrentVoxel.height,
+    objCurrentVoxel.depth
   );
+  const voxelMaterial = setDefaultMaterial(objCurrentVoxel.color);
+
+  const voxel = new THREE.Mesh(voxelGeometry, voxelMaterial);
 
   voxel.position.set(position.x, position.y, position.z);
   voxel.additionalData = objCurrentVoxel;
   console.log(voxel);
   scene.add(voxel);
   voxels.push(voxel);
-
-  console.log(voxels);
 }
 
 function refreshWireframePreview() {
@@ -210,9 +271,11 @@ function buildInterface() {
     )
     .name("Salvar Cena");
 }
+
 function render() {
   requestAnimationFrame(render);
   renderer.render(scene, camera);
 }
+
 buildInterface();
 render();

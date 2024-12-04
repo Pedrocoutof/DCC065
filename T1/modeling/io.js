@@ -1,6 +1,7 @@
 
 import * as THREE from 'three';
 import voxelTypes from './voxelTypes.js';
+import { setDefaultMaterial } from "util";
 
 
 // Função para salvar a cena
@@ -47,11 +48,16 @@ export function loadScene(file, scene, helpers) {
       const loadedVoxels = [];
 
       json.forEach((voxelData) => {
-        console.log(voxelData);
-          const geometry = new THREE.BoxGeometry(1, 1, 1);
-          const material = new THREE.MeshBasicMaterial(
-            voxelData.materialProps || { color: 0xffffff }
+          const geometry = new THREE.BoxGeometry(
+            voxelData.additionalData.width,
+            voxelData.additionalData.height,
+            voxelData.additionalData.depth
           );
+
+          const material = new setDefaultMaterial(
+            voxelData.materialProps.color ||  0xffffff
+          );
+
           const mesh = new THREE.Mesh(geometry, material);
           mesh.position.set(
             voxelData.position.x,
@@ -61,7 +67,6 @@ export function loadScene(file, scene, helpers) {
           loadedVoxels.push(mesh);
       });
 
-      // Limpa e restaura a cena
       scene.clear();
       scene.add(gridHelper);
       scene.add(groundPlane);
@@ -97,73 +102,3 @@ export function setupGUI(scene, voxels) {
     gui.add(params, 'salvarCena').name('Salvar Cena');
     gui.add(params, 'carregarCena').name('Carregar Cena');
 }
-
-
-//FUNÇÕES AUXILIARES
-
-// const generateTrunk = () => {
-//   const geometry = new THREE.BoxGeometry(1, MAX_HEIGHT, 1);
-//   const material = new THREE.MeshBasicMaterial({ color: 'brown' })
-//   return new THREE.Mesh(geometry, material);
-// };
-
-const createTree1 = () => {
-  const group = new THREE.Group();
-  group.userData = { type: "tree", name: "tree1" };
-
-  const trunk = generateTrunk();
-  trunk.position.y = 1;
-  group.add(trunk);
-
-  const foliage = new THREE.Mesh(
-    new THREE.BoxGeometry(2, 2, 2),
-    new THREE.MeshBasicMaterial({ color: "green" })
-  );
-  foliage.position.y = 2;
-  group.add(foliage);
-
-  return group;
-};
-
-const createTree2 = () => {
-  const group = new THREE.Group();
-  group.userData = { type: "tree", name: "tree2" };
-
-  const trunk = generateTrunk();
-  trunk.position.y = 1;
-  group.add(trunk);
-
-  const foliage = new THREE.Mesh(
-    new THREE.ConeGeometry(1.5, 4, 6),
-    new THREE.MeshBasicMaterial({ color: "forestgreen" })
-  );
-  foliage.position.y = 3;
-  group.add(foliage);
-
-  return group;
-};
-
-const createTree3 = () => {
-  const group = new THREE.Group();
-  group.userData = { type: "tree", name: "tree3" };
-
-  const trunk = generateTrunk();
-  trunk.position.y = 1;
-  group.add(trunk);
-
-  const foliage1 = new THREE.Mesh(
-    new THREE.SphereGeometry(1.5, 8, 8),
-    new THREE.MeshBasicMaterial({ color: "green" })
-  );
-  foliage1.position.y = 2;
-  group.add(foliage1);
-
-  const foliage2 = new THREE.Mesh(
-    new THREE.SphereGeometry(1, 8, 8),
-    new THREE.MeshBasicMaterial({ color: "forestgreen" })
-  );
-  foliage2.position.y = 3.5;
-  group.add(foliage2);
-
-  return group;
-};
