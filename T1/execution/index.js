@@ -7,6 +7,7 @@ import { initRenderer,
         initDefaultBasicLight,
         setDefaultMaterial,
         InfoBox } from 'util';
+import { buildInterface } from 'ui';
 
 let scene, renderer, camera, material, light, orbit;
 
@@ -115,4 +116,31 @@ function render() {
     renderer.render(scene, activeCamera);
 }
 
+function buildModeling(data) {
+
+    data.forEach((voxelData) => {
+        const geometry = new THREE.BoxGeometry(
+          voxelData.additionalData.width,
+          voxelData.additionalData.height,
+          voxelData.additionalData.depth
+        );
+
+        const material = new setDefaultMaterial(
+          voxelData.materialProps.color ||  0xffffff
+        );
+
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.position.set(
+          voxelData.position.x,
+          voxelData.position.y,
+          voxelData.position.z
+        );
+
+        scene.add(mesh);
+    });
+
+    console.log(data)
+}
+
+buildInterface(buildModeling);
 render();
