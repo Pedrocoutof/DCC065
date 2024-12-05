@@ -8,6 +8,7 @@ import { initRenderer,
         setDefaultMaterial,
         InfoBox } from 'util';
 import { buildInterface } from 'ui';
+import CONSTS from 'consts';
 
 let scene, renderer, camera, material, light, orbit;
 
@@ -118,28 +119,43 @@ function render() {
 
 function buildModeling(data) {
 
-    data.forEach((voxelData) => {
-        const geometry = new THREE.BoxGeometry(
-          voxelData.additionalData.width,
-          voxelData.additionalData.height,
-          voxelData.additionalData.depth
-        );
+    const height = 1;
 
-        const material = new setDefaultMaterial(
-          voxelData.materialProps.color ||  0xffffff
-        );
+    const positions = [
+        new THREE.Vector3(12, height, 10),
+        new THREE.Vector3(-6, height, 10),
 
-        const mesh = new THREE.Mesh(geometry, material);
-        mesh.position.set(
-          voxelData.position.x,
-          voxelData.position.y,
-          voxelData.position.z
-        );
+        new THREE.Vector3(10, height, 0),
+        new THREE.Vector3(-6, height, 0),
 
-        scene.add(mesh);
+        new THREE.Vector3(6, height, -10),
+        new THREE.Vector3(-12, height, -10),
+    ];
+
+    positions.forEach((basePosition, index) => {
+        data.forEach((voxelData) => {
+            const geometry = new THREE.BoxGeometry(
+                voxelData.additionalData.width,
+                voxelData.additionalData.height,
+                voxelData.additionalData.depth
+            );
+
+            const voxelMaterial = setDefaultMaterial(
+                voxelData.materialProps.color || 0xffffff
+            );
+
+            const mesh = new THREE.Mesh(geometry, voxelMaterial);
+            
+            mesh.position.set(
+                voxelData.position.x + basePosition.x,
+                voxelData.position.y + basePosition.y,
+                voxelData.position.z + basePosition.z
+            );
+
+            scene.add(mesh);
+        });
     });
 
-    console.log(data)
 }
 
 buildInterface(buildModeling);

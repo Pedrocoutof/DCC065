@@ -20,6 +20,7 @@ let scene, renderer, camera, light, orbit;
 let currentVoxelType = 0;
 let position = new THREE.Vector3(0.5, 0.5, 0.5);
 let voxels = [];
+let sphereObjects = [];
 
 scene = new THREE.Scene();
 renderer = initRenderer();
@@ -34,13 +35,13 @@ const groundPlane = createGroundPlaneXZ(SIZE_X, SIZE_Z);
 scene.add(groundPlane);
 
 let wireframePreview = new THREE.Group();
-let textLabel;
+
 scene.add(wireframePreview);
 updateWireframePreview();
 
 function updateWireframePreviewPosition() {
   wireframePreview.position.set(position.x, position.y, position.z);
-  updateTextLabel();
+  refreshWireframeReference(wireframePreview);
 }
 
 function updateWireframePreview() {
@@ -65,60 +66,25 @@ function updateWireframePreview() {
 
   wireframePreview.add(wireframe);
 
-  updateTextLabel();
   scene.add(wireframePreview);
   updateWireframePreviewPosition();
 }
 
-function updateTextLabel() {
-  if (textLabel && textLabel.parent) {
-    textLabel.parent.remove(textLabel);
+function refreshWireframeReference(wireframe) {
+  sphereObjects.forEach(sphere => scene.remove(sphere));
+  sphereObjects = [];
+
+  const radius = 0.1;
+  const segments = 16;
+  const sphereGeometry = new THREE.SphereGeometry(radius, segments, segments);
+  const sphereMaterial = new setDefaultMaterial("red");
+
+  for (let i = 1; i <= wireframe.position.y; i++) {
+    const sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphere.position.set(position.x, position.y - i - 0.5, position.z);
+    scene.add(sphere);
+    sphereObjects.push(sphere);
   }
-  const positionText = `x: ${position.x - 0.5}, y: ${position.y - 0.5}, z: ${position.z - 0.5}, name: ${voxelTypes[currentVoxelType].name}`;
-  textLabel = makeTextSprite(positionText);
-
-  const bbox = new THREE.Box3().setFromObject(wireframePreview);
-  const size = bbox.getSize(new THREE.Vector3());
-  textLabel.position.set(0, size.y + 0.1, 0);
-
-  wireframePreview.add(textLabel);
-}
-
-function makeTextSprite(message) {
-  let fontface = "Arial";
-  let fontsize = 18;
-  let borderThickness = 10;
-
-  let canvas = document.createElement("canvas");
-  let context = canvas.getContext("2d");
-  context.font = "Bold " + fontsize + "px " + fontface;
-
-  // Medir o texto
-  let metrics = context.measureText(message);
-  let textWidth = metrics.width;
-
-  // Configurar o canvas
-  canvas.width = textWidth + borderThickness * 2;
-  canvas.height = fontsize * 1.4 + borderThickness * 2;
-  context.font = "Bold " + fontsize + "px " + fontface;
-
-  // Fundo e borda
-  context.fillStyle = 'rgb(255,255,255)';
-  context.lineWidth = borderThickness;
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  context.strokeRect(0, 0, canvas.width, canvas.height);
-
-  // Texto
-  context.fillStyle = "rgba(0, 0, 0, 1.0)";
-  context.fillText(message, borderThickness, fontsize + borderThickness);
-
-  // Criar textura e Sprite
-  let texture = new THREE.Texture(canvas);
-  texture.needsUpdate = true;
-  let spriteMaterial = new THREE.SpriteMaterial({ map: texture });
-  let sprite = new THREE.Sprite(spriteMaterial);
-  sprite.scale.set(canvas.width / 100, canvas.height / 100, 1);
-  return sprite;
 }
 
 function addVoxel() {
@@ -138,6 +104,8 @@ function addVoxel() {
   console.log(voxel);
   scene.add(voxel);
   voxels.push(voxel);
+
+  updateWireframePreviewPosition(); 
 }
 
 function refreshWireframePreview() {
@@ -164,6 +132,8 @@ function removeVoxel() {
     scene.remove(voxel);
     voxels = voxels.filter((v) => v !== voxel);
   }
+
+  updateWireframePreviewPosition(); 
 }
 
 document.addEventListener("keydown", function (event) {
@@ -231,13 +201,10 @@ document.addEventListener("keydown", function (event) {
 
 function buildInterface() {
   let gui = new GUI();
-
-  // Adiciona a opção "Carregar Cena"
   gui
     .add(
       {
         loadScene: () => {
-          // Cria o seletor de arquivos
           const input = document.createElement("input");
           input.type = "file";
           input.accept = ".json";
@@ -246,25 +213,24 @@ function buildInterface() {
             const file = event.target.files[0];
             if (file) {
               const helpers = { gridHelper, groundPlane, light };
-              loadScene(file, scene, helpers); // Chama a função loadScene passando os parâmetros necessários
+              loadScene(file, scene, helpers); 
               refreshWireframePreview();
               simulateKeyPress("Comma");
             }
           });
 
-          input.click(); // Simula o clique no seletor de arquivos
+          input.click();
         },
       },
       "loadScene"
     )
     .name("Carregar Cena");
 
-  // Adiciona a opção "Salvar Cena"
   gui
     .add(
       {
         saveScene: () => {
-          saveScene("scene.json", voxels); // Chama a função saveScene diretamente
+          saveScene("scene.json", voxels);
         },
       },
       "saveScene"
