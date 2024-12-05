@@ -6,8 +6,8 @@ const defaultBoxSize = {
 
 const voxelTypes = [
     {
-        color: 'brown',
-        name: 'brown',
+        color: '#966F33',
+        name: 'wood',
         ...defaultBoxSize
     },
     {
@@ -16,18 +16,18 @@ const voxelTypes = [
         ...defaultBoxSize
     },
     {
-        color: 'yellow',
-        name: 'yellow',
+        color: 'darkgreen',
+        name: 'darkgreen',
         ...defaultBoxSize
     },
     {
-        color: 'purple',
-        name: 'purple',
+        color: 'darkorange',
+        name: 'orange',
         ...defaultBoxSize
     },
     {
-        color: 'black',
-        name: 'black',
+        color: '#D8B589',
+        name: 'oak',
         ...defaultBoxSize
     },
 ];

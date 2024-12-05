@@ -1,0 +1,206 @@
+[
+  {
+    "position": {
+      "x": 0.5,
+      "y": 0.5,
+      "z": 0.5
+    },
+    "materialProps": {
+      "color": 9858867
+    },
+    "additionalData": {
+      "color": "#966F33",
+      "name": "wood",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 0.5,
+      "y": 1.5,
+      "z": 0.5
+    },
+    "materialProps": {
+      "color": 9858867
+    },
+    "additionalData": {
+      "color": "#966F33",
+      "name": "wood",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 0.5,
+      "y": 2.5,
+      "z": 0.5
+    },
+    "materialProps": {
+      "color": 9858867
+    },
+    "additionalData": {
+      "color": "#966F33",
+      "name": "wood",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 0.5,
+      "y": 3.5,
+      "z": 0.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 0.5,
+      "y": 2.5,
+      "z": 1.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 1.5,
+      "y": 2.5,
+      "z": 1.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 1.5,
+      "y": 2.5,
+      "z": 0.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 1.5,
+      "y": 2.5,
+      "z": -0.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": 0.5,
+      "y": 2.5,
+      "z": -0.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": -0.5,
+      "y": 2.5,
+      "z": -0.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": -0.5,
+      "y": 2.5,
+      "z": 0.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  },
+  {
+    "position": {
+      "x": -0.5,
+      "y": 2.5,
+      "z": 1.5
+    },
+    "materialProps": {
+      "color": 16747520
+    },
+    "additionalData": {
+      "color": "darkorange",
+      "name": "orange",
+      "width": 1,
+      "height": 1,
+      "depth": 1
+    }
+  }
+]
