@@ -11,10 +11,9 @@ const movement = {
 
 const assetsPath = {
     three: {
-        path: "./assets/",
         filesName: [
-            // "oak.json",
-            // "default.json",
+            "oak.json",
+            "default.json",
             "autumn.json"
         ]
     }

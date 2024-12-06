@@ -117,11 +117,35 @@ function render() {
     renderer.render(scene, activeCamera);
 }
 
-function buildModeling(data) {
+function buildModeling(data, basePosition) {
+    data.forEach(voxelData => {
+        const geometry = new THREE.BoxGeometry(
+            voxelData.additionalData.width,
+            voxelData.additionalData.height,
+            voxelData.additionalData.depth
+        );
+
+        const voxelMaterial = setDefaultMaterial(
+            voxelData.materialProps.color || 0xffffff
+        );
+
+        const mesh = new THREE.Mesh(geometry, voxelMaterial);
+        
+        mesh.position.set(
+            voxelData.position.x + basePosition.x,
+            voxelData.position.y + basePosition.y,
+            voxelData.position.z + basePosition.z
+        );
+
+        scene.add(mesh);
+    });
+}
+
+async function buildAssets() {
 
     const height = 1;
 
-    const positions = [
+    const basePositions = [
         new THREE.Vector3(12, height, 10),
         new THREE.Vector3(-6, height, 10),
 
@@ -132,31 +156,27 @@ function buildModeling(data) {
         new THREE.Vector3(-12, height, -10),
     ];
 
-    positions.forEach((basePosition, index) => {
-        data.forEach((voxelData) => {
-            const geometry = new THREE.BoxGeometry(
-                voxelData.additionalData.width,
-                voxelData.additionalData.height,
-                voxelData.additionalData.depth
-            );
+    try {
+        const treeDataArray = await Promise.all(
+            CONSTS.assetsPath.three.filesName.map(file => fetch("./assets/" + file).then(response => {
+                if (!response.ok) {
+                    throw new Error(`${file}: ${response.statusText}`);
+                }
+                return response.json();
+            }))
+        );
 
-            const voxelMaterial = setDefaultMaterial(
-                voxelData.materialProps.color || 0xffffff
-            );
-
-            const mesh = new THREE.Mesh(geometry, voxelMaterial);
-            
-            mesh.position.set(
-                voxelData.position.x + basePosition.x,
-                voxelData.position.y + basePosition.y,
-                voxelData.position.z + basePosition.z
-            );
-
-            scene.add(mesh);
+        basePositions.forEach((basePosition, index) => {
+            const assetIndex = index % treeDataArray.length;
+            let treeData = treeDataArray[assetIndex];
+            buildModeling(treeData, basePosition);
         });
-    });
 
+    } catch (error) {
+        console.error(error);
+    }
 }
 
-buildInterface(buildModeling);
-render();
+buildAssets().then(() => {
+    render();
+});
