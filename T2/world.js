@@ -33,8 +33,8 @@ export class World extends THREE.Group {
         );
     }
 
-    hasVoxel(x, y, z) {
-        return this.data[x][y][z] ? true : false;
+    hasVoxel(x, z, y) {
+        return !this.data[x][z][y].instanceId ? true : false
     }
 
     generate() {
@@ -43,11 +43,27 @@ export class World extends THREE.Group {
         this.generateMesh();
     }
 
+    getCenterMap() {
+        return {
+            x: this.size.width / 2,
+            z: this.size.width / 2,
+            y: this.size.height / 2,
+        }
+    }
+
+    getHeightByXZ(x, z) {
+        let i = 1;
+        while(!this.hasVoxel(x, z, i)) {
+            i++;
+        }
+        return i;
+    }
+
     initTerrain() {
         this.data = [];
-        for (let x = -this.size.width/2; x < this.size.width/2; x++) {
+        for (let x = 0; x < this.size.width; x++) {
             const slice = [];
-            for (let z = -this.size.width/2; z < this.size.width/2; z++) {
+            for (let z = 0; z < this.size.width; z++) {
                 const row = [];
                 for (let y = 0; y < this.size.height; y++) {
                     row.push({
@@ -95,8 +111,9 @@ export class World extends THREE.Group {
                         matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
     
                         if (Math.random() < 0.0008) {
-                            if (!this.hasVoxel(x, y + 1, z)) {
-                                const tree = this.createVoxelTree(x + 0.5, y + 1, z + 0.5);
+                            if (!this.hasVoxel(x, z, y + 1)) {
+                                const terrainHeight = this.getHeightByXZ(x, z);
+                                const tree = this.createVoxelTree(x + 0.5, terrainHeight + 0.5, z + 0.5);
                                 this.add(tree);
                             }
                         }
@@ -115,13 +132,13 @@ export class World extends THREE.Group {
         const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });
         const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
     
-        trunk.position.set(x, y + 1, z);
+        trunk.position.set(x, y + 1, z); // Ajuste aqui, y já está no topo do terreno
     
         const foliageGeometry = new THREE.BoxGeometry(3, 1, 3);
         const foliageMaterial = new THREE.MeshLambertMaterial({ color: "green" });
         const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
     
-        foliage.position.set(x, y + 2, z);
+        foliage.position.set(x, y + 3, z); // Foliage posicionada um pouco acima do tronco
     
         const tree = new THREE.Group();
         tree.add(trunk);

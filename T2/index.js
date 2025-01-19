@@ -1,12 +1,10 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'OrbitControls';
-import { initRenderer, 
-        initCamera,
-        initDefaultBasicLight,
-        setDefaultMaterial } from 'util';
+import { initRenderer, initCamera, initDefaultBasicLight, setDefaultMaterial } from 'util';
 import { buildInterface } from 'ui';
 import { World } from 'world';
 import GlobalConfig from "./GlobalConfig.js";
+import Player from "./Player.js";
 
 let scene = new THREE.Scene();
 let renderer = initRenderer();
@@ -18,13 +16,17 @@ let orbit = new OrbitControls(camera, renderer.domElement);
 const world = new World();
 world.generate();
 scene.add(world);
-scene.fog = new THREE.Fog( 0xcccccc, GlobalConfig.fogValue, GlobalConfig.fogValue + 25 );
+scene.fog = new THREE.Fog(0xcccccc, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
 
-let firstPersonCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1);
+const player = new Player();
+scene.add(player);
+player.loadModel(
+    world.getCenterMap().x,
+    world.getCenterMap().z,
+    world.getHeightByXZ(world.getCenterMap().x, world.getCenterMap().z)
+);
+
 let activeCamera = camera;
-
-let firstPersonCameraVerticalRotation = 0;
-let firstPersonCameraHorizontalRotation = 0;
 
 const { stats } = buildInterface((type, value) => {
     if (type === 'fog') {
@@ -34,20 +36,36 @@ const { stats } = buildInterface((type, value) => {
 });
 
 window.addEventListener('keydown', (event) => {
-    if (event.key.toLowerCase() === 'c') {
-        if (activeCamera === camera) {
-            activeCamera = firstPersonCamera;
-            orbit.enabled = false;
-            document.body.requestPointerLock(); 
-        } else {
-            activeCamera = camera;
-            orbit.enabled = true;
-            document.exitPointerLock();
-        }
+    switch (event.key.toLowerCase()) {
+        case 'c':
+            toggleCamera();
+            break;
+        case 'y':
+            player.toggleYInversion();
+            break;
+        default:
+            player.handleKeyDown(event.key);
+            break;
     }
 });
 
+window.addEventListener('keyup', (event) => {
+    player.handleKeyUp(event.key);
+});
+
 document.addEventListener('pointerlockchange', onPointerLockChange, false);
+
+function toggleCamera() {
+    if (activeCamera === camera) {
+        activeCamera = player.thirdPersonCamera;
+        orbit.enabled = false;
+        document.body.requestPointerLock();
+    } else {
+        activeCamera = camera;
+        orbit.enabled = true;
+        document.exitPointerLock();
+    }
+}
 
 function onPointerLockChange() {
     if (document.pointerLockElement === document.body) {
@@ -60,27 +78,12 @@ function onPointerLockChange() {
 function onMouseMove(event) {
     const movementX = event.movementX || 0;
     const movementY = event.movementY || 0;
-    const sensitivity = 0.002;
-
-    firstPersonCameraVerticalRotation -= movementX * sensitivity;
-    firstPersonCameraHorizontalRotation -= movementY * sensitivity;
-
-    const maxRotation = Math.PI / 2 - 0.1;
-    const minRotation = -Math.PI / 2 + 0.1;
-    firstPersonCameraHorizontalRotation = Math.max(minRotation, Math.min(maxRotation, firstPersonCameraHorizontalRotation));
+    player.updateCameraRotation(movementX, movementY);
 }
 
 function render() {
-    if (activeCamera === firstPersonCamera) {
-        firstPersonCamera.position.copy(world.position);  // Usa a posição do mundo para a câmera
-        firstPersonCamera.position.y += 0.5;
-        firstPersonCamera.rotation.order = 'YXZ';
-        firstPersonCamera.rotation.y = firstPersonCameraVerticalRotation;
-        firstPersonCamera.rotation.x = firstPersonCameraHorizontalRotation;
-    }
-
+    player.update();
     stats.update();
-
     requestAnimationFrame(render);
     renderer.render(scene, activeCamera);
 }
