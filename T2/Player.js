@@ -17,6 +17,7 @@ export default class Player extends THREE.Group {
         this.add(this.thirdPersonCamera);
 
         this.cameraTarget = new THREE.Vector3();
+        this.mixer = null;
     }
 
     loadModel(x, z, y) {
@@ -27,6 +28,12 @@ export default class Player extends THREE.Group {
                 this.playerModel.scale.set(1, 1, 1);
                 this.playerModel.position.set(x, y + 1.5, z);
                 this.add(this.playerModel);
+
+                this.mixer = new THREE.AnimationMixer(this.playerModel);
+                gltf.animations.forEach((clip) => {
+                    this.mixer.clipAction(clip).play();
+                });
+                
             }
         );
     }
@@ -88,20 +95,39 @@ export default class Player extends THREE.Group {
             const right = new THREE.Vector3();
             right.crossVectors(this.thirdPersonCamera.up, direction).normalize();
 
+            let isMoving = false; // Variável para verificar se o player está se movendo
+
             if (this.movement.forward) {
                 this.playerModel.position.addScaledVector(direction, this.speed);
+                isMoving = true;
             }
             if (this.movement.backward) {
                 this.playerModel.position.addScaledVector(direction, -this.speed);
+                isMoving = true;
             }
             if (this.movement.left) {
                 this.playerModel.position.addScaledVector(right, this.speed);
+                isMoving = true;
             }
             if (this.movement.right) {
                 this.playerModel.position.addScaledVector(right, -this.speed);
+                isMoving = true;
+            }
+
+            if (isMoving) {
+                this.playAnimation('Walking');
+                    if (this.mixer) {
+                        this.mixer.update(0.016);
+                    }
             }
 
             this.updateCameraPosition();
+        }
+    }
+
+    playAnimation() {
+        if (this.mixer) {
+            const action = this.mixer.clipAction(null);
         }
     }
 }
