@@ -7,9 +7,13 @@ export class World extends THREE.Group {
 
     params = {
         terrains: {
-            scale: 30,
-            magnitude: 0.2,
-            offset: 0.2
+            scale: 80,
+            magnitude: 0.3,
+            offset: 0.3
+        },
+        biome: {
+            sandLevel: 2,
+            stoneLevel: 3,
         }
     };
 
@@ -25,6 +29,12 @@ export class World extends THREE.Group {
         }
     }
 
+    setBlockType(x, y, z, type) {
+        if (this.inBounds(x, y, z)) {
+            this.data[x][z][y].type = type;
+        }
+    }
+
     inBounds(x, y, z) {
         return (
             x >= 0 && x < this.size.width &&
@@ -34,7 +44,7 @@ export class World extends THREE.Group {
     }
 
     hasVoxel(x, z, y) {
-        return !this.data[x][z][y].instanceId ? true : false
+        return !this.data[x][z][y].instanceId ? true : false;
     }
 
     generate() {
@@ -53,7 +63,7 @@ export class World extends THREE.Group {
 
     getHeightByXZ(x, z) {
         let i = 1;
-        while(!this.hasVoxel(x, z, i)) {
+        while (!this.hasVoxel(x, z, i)) {
             i++;
         }
         return i;
@@ -88,19 +98,45 @@ export class World extends THREE.Group {
                 height = Math.max(1, Math.min(height, this.size.height));
 
                 for (let y = 0; y < height; y++) {
+                    if (y === 0) {
+                        this.setBlockType(x, y, z, 'stone');
+                    } else if (y < this.params.biome.sandLevel) {
+                        this.setBlockType(x, y, z, 'sand');
+                    } else if (y < this.params.biome.stoneLevel) {
+                        this.setBlockType(x, y, z, 'dirt');
+                    } else {
+                        this.setBlockType(x, y, z, 'grass');
+                    }
                     this.setBlockId(x, y, z, 1);
                 }
             }
         }
     }
 
-    generateMesh() {
+    generateMeshVoxel(color) {
         const maxCount = this.size.width * this.size.width * this.size.height;
         const voxelGeometry = new THREE.BoxGeometry(1, 1, 1);
-        const voxelMaterial = new THREE.MeshLambertMaterial({ color: "forestgreen" });
-    
+        const voxelMaterial = new THREE.MeshLambertMaterial({ color: color });
         const mesh = new THREE.InstancedMesh(voxelGeometry, voxelMaterial, maxCount);
-        mesh.count = 0;
+        return mesh;
+    }
+
+    generateMesh() {
+        const grassMesh = this.generateMeshVoxel('forestgreen');
+        grassMesh.count = 0;
+        const dirtMesh = this.generateMeshVoxel(0x926c4d);
+        dirtMesh.count = 0;
+        const stoneMesh = this.generateMeshVoxel(0x808080);
+        stoneMesh.count = 0;
+        const sandMesh = this.generateMeshVoxel(0xC2B280);
+        sandMesh.count = 0;
+    
+        const typesMeshes = {
+            'grass': grassMesh,
+            'dirt': dirtMesh,
+            'stone': stoneMesh,
+            'sand': sandMesh
+        };
     
         const matrix = new THREE.Matrix4();
     
@@ -110,7 +146,10 @@ export class World extends THREE.Group {
                     if (this.data[x][z][y].instanceId !== null) {
                         matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
     
-                        if (Math.random() < 0.0008) {
+                        const type = this.data[x][z][y].type;
+                        const mesh = typesMeshes[type];
+
+                        if (type === 'grass' && Math.random() < 0.001) {
                             if (!this.hasVoxel(x, z, y + 1)) {
                                 const terrainHeight = this.getHeightByXZ(x, z);
                                 const tree = this.createVoxelTree(x + 0.5, terrainHeight + 0.5, z + 0.5);
@@ -118,27 +157,32 @@ export class World extends THREE.Group {
                             }
                         }
     
-                        mesh.setMatrixAt(mesh.count++, matrix);
+                        if (mesh) {
+                            mesh.setMatrixAt(mesh.count++, matrix);
+                        }
                     }
                 }
             }
         }
     
-        this.add(mesh);
+        this.add(grassMesh);
+        this.add(dirtMesh);
+        this.add(stoneMesh);
+        this.add(sandMesh);
     }
-    
+
     createVoxelTree(x, y, z) {
         const trunkGeometry = new THREE.BoxGeometry(1, 3, 1);
         const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });
         const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
     
-        trunk.position.set(x, y + 1, z); // Ajuste aqui, y já está no topo do terreno
+        trunk.position.set(x, y + 1, z);
     
         const foliageGeometry = new THREE.BoxGeometry(3, 1, 3);
         const foliageMaterial = new THREE.MeshLambertMaterial({ color: "green" });
         const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
     
-        foliage.position.set(x, y + 3, z); // Foliage posicionada um pouco acima do tronco
+        foliage.position.set(x, y + 3, z);
     
         const tree = new THREE.Group();
         tree.add(trunk);
@@ -146,5 +190,5 @@ export class World extends THREE.Group {
     
         return tree;
     }
-    
+
 }
