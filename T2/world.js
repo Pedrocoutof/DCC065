@@ -152,7 +152,7 @@ export class World extends THREE.Group {
                         if (type === 'grass' && Math.random() < 0.001) {
                             if (!this.hasVoxel(x, z, y + 1)) {
                                 const terrainHeight = this.getHeightByXZ(x, z);
-                                const tree = this.createVoxelTree(x + 0.5, terrainHeight + 0.5, z + 0.5);
+                                const tree = this.generateRandomThree(x + 0.5, terrainHeight + 0.5, z + 0.5);
                                 this.add(tree);
                             }
                         }
@@ -171,7 +171,19 @@ export class World extends THREE.Group {
         this.add(sandMesh);
     }
 
-    createVoxelTree(x, y, z) {
+    generateRandomThree(x, y, z) {
+        let rand = Math.random();
+    
+        if (rand < 0.33) {
+            return this.autumnThree(x, y, z);
+        } else if (rand < 0.66) {
+            return this.oakThree(x, y, z);
+        } else {
+            return this.defaultThree(x, y, z);
+        }
+    }    
+
+    autumnThree(x, y, z) {
         const trunkGeometry = new THREE.BoxGeometry(1, 3, 1);
         const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });
         const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
@@ -179,7 +191,59 @@ export class World extends THREE.Group {
         trunk.position.set(x, y + 1, z);
     
         const foliageGeometry = new THREE.BoxGeometry(3, 1, 3);
+        const foliageMaterial = new THREE.MeshLambertMaterial({ color: "yellow" });
+        const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
+    
+        foliage.position.set(x, y + 3, z);
+    
+        const tree = new THREE.Group();
+        tree.add(trunk);
+        tree.add(foliage);
+    
+        return tree;
+    }
+    defaultThree(x, y, z) {
+        const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });
         const foliageMaterial = new THREE.MeshLambertMaterial({ color: "green" });
+        
+        const trunk = new THREE.Group();
+        for (let i = 0; i < 3; i++) {
+            const trunkCube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), trunkMaterial);
+            trunkCube.position.set(x, y + i, z);
+            trunk.add(trunkCube);
+        }
+    
+        const foliage = new THREE.Group();
+        for (let i = -1; i <= 1; i++) {
+            for (let j = -1; j <= 1; j++) {
+                const foliageCube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), foliageMaterial);
+                foliageCube.position.set(x + i, y + 3, z + j);
+                foliage.add(foliageCube);
+            }
+        }
+
+
+        const foliageCube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), foliageMaterial);
+        foliageCube.position.set(x, y + 4, z);
+        foliage.add(foliageCube);
+    
+        const tree = new THREE.Group();
+        tree.add(trunk);
+        tree.add(foliage);
+    
+        return tree;
+    }
+    
+    oakThree(x, y, z) {
+
+        const trunkGeometry = new THREE.BoxGeometry(1, 3, 1);
+        const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });
+        const trunk = new THREE.Mesh(trunkGeometry, trunkMaterial);
+    
+        trunk.position.set(x, y + 1, z);
+    
+        const foliageGeometry = new THREE.BoxGeometry(3, 1, 3);
+        const foliageMaterial = new THREE.MeshLambertMaterial({ color: "red" });
         const foliage = new THREE.Mesh(foliageGeometry, foliageMaterial);
     
         foliage.position.set(x, y + 3, z);
