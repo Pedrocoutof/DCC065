@@ -7,7 +7,7 @@ import GlobalConfig from "./GlobalConfig.js";
 import Player from "./Player.js";
 
 let scene = new THREE.Scene();
-let renderer = initRenderer();
+let renderer = initRenderer('#6EB1FF');
 let camera = initCamera(new THREE.Vector3(160, 30, 160));
 let material = setDefaultMaterial();
 let light = initDefaultBasicLight(scene);
@@ -16,6 +16,7 @@ let orbit = new OrbitControls(camera, renderer.domElement);
 const world = new World();
 world.generate();
 scene.add(world);
+orbit.target.set(world.getCenterMap().x, 0, world.getCenterMap().z);
 scene.fog = new THREE.Fog(0xcccccc, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
 
 const player = new Player();
