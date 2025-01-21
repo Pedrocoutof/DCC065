@@ -20,6 +20,7 @@ light = initDefaultBasicLight(scene);
 orbit = new OrbitControls(camera, renderer.domElement);
 
 let firstPersonCamera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1 );
+firstPersonCamera.position.set(0, 1.5, 0);
 
 let activeCamera = camera;
 
@@ -31,7 +32,7 @@ window.addEventListener('keydown', (event) => {
         if (activeCamera === camera) {
             activeCamera = firstPersonCamera;
             orbit.enabled = false;
-            document.body.requestPointerLock(); // função para travar e esconder o mouse no centro da página/elemento
+            document.body.requestPointerLock();
             firstPersonCameraVerticalRotation = cube.rotation.y;
             firstPersonCameraHorizontalRotation = 0;
         } else {
@@ -61,10 +62,10 @@ function onMouseMove(event) {
     firstPersonCameraVerticalRotation -= movementX * sensitivity;
     firstPersonCameraHorizontalRotation -= movementY * sensitivity;
 
-    const maxfirstPersonCameraHorizontalRotation = Math.PI / 2 - 0.1;
-    const minfirstPersonCameraHorizontalRotation = -Math.PI / 2 + 0.1;
+    const maxVerticalRotation = Math.PI / 2 - 0.1;
+    const minVerticalRotation = -Math.PI / 2 + 0.1;
 
-    firstPersonCameraHorizontalRotation = Math.max(minfirstPersonCameraHorizontalRotation, Math.min(maxfirstPersonCameraHorizontalRotation, firstPersonCameraHorizontalRotation));
+    firstPersonCameraHorizontalRotation = Math.max(minVerticalRotation, Math.min(maxVerticalRotation, firstPersonCameraHorizontalRotation));
 }
 
 let axesHelper = new THREE.AxesHelper(12);
@@ -105,12 +106,26 @@ function render() {
     movementHandler.handleMovement();
 
     if (activeCamera === firstPersonCamera) {
-        firstPersonCamera.position.copy(cube.position);
-        firstPersonCamera.position.y += 0.5
+        firstPersonCamera.rotation.order = 'YXZ'; // Ordem de rotação: Y (horizontal) -> X (vertical)
 
-        firstPersonCamera.rotation.order = 'YXZ';
+        // Atualizar a rotação da câmera com base nas variáveis de rotação
         firstPersonCamera.rotation.y = firstPersonCameraVerticalRotation;
         firstPersonCamera.rotation.x = firstPersonCameraHorizontalRotation;
+
+        // Ajuste da posição da câmera para que ela gire ao redor do personagem
+        const distance = 5; // Distância da câmera ao personagem
+        const height = 1.5; // Altura da câmera (em relação ao solo)
+
+        // Calcular a posição da câmera ao redor do personagem horizontalmente
+        const offset = new THREE.Vector3(
+            Math.sin(firstPersonCameraVerticalRotation) * distance,
+            height + Math.sin(firstPersonCameraHorizontalRotation) * 2, // Movimentação vertical (acima/abaixo)
+            Math.cos(firstPersonCameraVerticalRotation) * distance
+        );
+
+        // Atualiza a posição da câmera, deslocando-a em relação à posição do personagem (o cubo)
+        firstPersonCamera.position.copy(cube.position).add(offset);
+        firstPersonCamera.lookAt(cube.position); // Fazer a câmera olhar para o personagem
     }
 
     requestAnimationFrame(render);
