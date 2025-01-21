@@ -49,6 +49,13 @@ window.addEventListener('keydown', (event) => {
             break;
     }
 });
+window.addEventListener('mousedown', (event) => {
+    switch (event.button) {
+        case 2: // Botão direito do mouse
+            player.jump(); // Chama o método de pulo do jogador
+            break;
+    }
+});
 
 window.addEventListener('keyup', (event) => {
     player.handleKeyUp(event.key);
