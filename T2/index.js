@@ -4,7 +4,6 @@ import { initRenderer, initCamera, initDefaultBasicLight, setDefaultMaterial } f
 import { buildInterface } from 'ui';
 import { World } from 'world';
 import GlobalConfig from "./GlobalConfig.js";
-import Player from "./Player.js";
 
 let scene = new THREE.Scene();
 let renderer = initRenderer('#6EB1FF');
@@ -19,15 +18,22 @@ scene.add(world);
 orbit.target.set(world.getCenterMap().x, 0, world.getCenterMap().z);
 scene.fog = new THREE.Fog(0xcccccc, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
 
-const player = new Player();
-scene.add(player);
-player.loadModel(
-    world.getCenterMap().x,
-    world.getCenterMap().z,
-    world.getHeightByXZ(world.getCenterMap().x, world.getCenterMap().z)
-);
-
 let activeCamera = camera;
+
+// Criando o player - um cubo vermelho
+const playerGeometry = new THREE.BoxGeometry(1, 1, 1);
+const playerMaterial = new THREE.MeshLambertMaterial({ color: 'red' });
+const player = new THREE.Mesh(playerGeometry, playerMaterial);
+
+// Definindo a posição inicial do player
+player.position.set(world.getCenterMap().x, 1, world.getCenterMap().z); // Colocando o player no centro do mapa
+scene.add(player);
+
+const speed = 0.5; // Velocidade de movimento do player
+let moveForward = false;
+let moveBackward = false;
+let moveLeft = false;
+let moveRight = false;
 
 const { stats } = buildInterface((type, value) => {
     if (type === 'fog') {
@@ -41,39 +47,39 @@ window.addEventListener('keydown', (event) => {
         case 'c':
             toggleCamera();
             break;
-        case 'y':
-            player.toggleYInversion();
+        case 'w':
+            moveForward = true;
             break;
-        default:
-            player.handleKeyDown(event.key);
+        case 's':
+            moveBackward = true;
             break;
-    }
-});
-window.addEventListener('mousedown', (event) => {
-    switch (event.button) {
-        case 2: // Botão direito do mouse
-            player.jump(); // Chama o método de pulo do jogador
+        case 'a':
+            moveLeft = true;
+            break;
+        case 'd':
+            moveRight = true;
             break;
     }
 });
 
 window.addEventListener('keyup', (event) => {
-    player.handleKeyUp(event.key);
+    switch (event.key.toLowerCase()) {
+        case 'w':
+            moveForward = false;
+            break;
+        case 's':
+            moveBackward = false;
+            break;
+        case 'a':
+            moveLeft = false;
+            break;
+        case 'd':
+            moveRight = false;
+            break;
+    }
 });
 
 document.addEventListener('pointerlockchange', onPointerLockChange, false);
-
-function toggleCamera() {
-    if (activeCamera === camera) {
-        activeCamera = player.thirdPersonCamera;
-        orbit.enabled = false;
-        document.body.requestPointerLock();
-    } else {
-        activeCamera = camera;
-        orbit.enabled = true;
-        document.exitPointerLock();
-    }
-}
 
 function onPointerLockChange() {
     if (document.pointerLockElement === document.body) {
@@ -86,14 +92,20 @@ function onPointerLockChange() {
 function onMouseMove(event) {
     const movementX = event.movementX || 0;
     const movementY = event.movementY || 0;
-    player.updateCameraRotation(movementX, movementY);
 }
 
 function render() {
-    player.update();
     stats.update();
+    movePlayer();
     requestAnimationFrame(render);
     renderer.render(scene, activeCamera);
+}
+
+function movePlayer() {
+    if (moveForward) player.position.z -= speed;
+    if (moveBackward) player.position.z += speed;
+    if (moveLeft) player.position.x -= speed;
+    if (moveRight) player.position.x += speed;
 }
 
 render();
