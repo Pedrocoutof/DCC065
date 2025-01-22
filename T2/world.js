@@ -44,7 +44,7 @@ export class World extends THREE.Group {
     }
 
     hasVoxel(x, z, y) {
-        return !this.data[x][z][y].instanceId ? true : false;
+        return this.data[x][z][y] && this.data[x][z][y].instanceId ? true : false;
     }
 
     generate() {
@@ -63,7 +63,7 @@ export class World extends THREE.Group {
 
     getHeightByXZ(x, z) {
         let i = 1;
-        while (!this.hasVoxel(x, z, i)) {
+        while (this.hasVoxel(x, z, i)) {
             i++;
         }
         return i;
@@ -149,7 +149,7 @@ export class World extends THREE.Group {
                         const type = this.data[x][z][y].type;
                         const mesh = typesMeshes[type];
 
-                        if (type === 'grass' && Math.random() < 0.001) {
+                        if (type === 'grass' && Math.random() < 0.003) {
                             if (!this.hasVoxel(x, z, y + 1)) {
                                 const terrainHeight = this.getHeightByXZ(x, z);
                                 const tree = this.generateRandomThree(x + 0.5, terrainHeight + 0.5, z + 0.5);

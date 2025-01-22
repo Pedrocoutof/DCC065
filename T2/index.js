@@ -17,9 +17,9 @@ const world = new World();
 world.generate();
 scene.add(world);
 orbit.target.set(world.getCenterMap().x, 0, world.getCenterMap().z);
-scene.fog = new THREE.Fog(0xcccccc, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
+scene.fog = new THREE.Fog(0x6EB1FF, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
 
-const player = new Player();
+const player = new Player(world);
 scene.add(player);
 player.loadModel(
     world.getCenterMap().x,

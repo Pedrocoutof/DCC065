@@ -2,8 +2,9 @@ import * as THREE from "three";
 import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
 
 export default class Player extends THREE.Group {
-    constructor() {
+    constructor(world) {
         super();
+        this.world = world;
         this.loader = new GLTFLoader();
         this.playerModel = null;
         this.movement = { forward: false, backward: false, left: false, right: false, up: false, down: false, shift: false };
@@ -13,7 +14,7 @@ export default class Player extends THREE.Group {
         this.baseSpeed = 0.1;
         this.speed = this.baseSpeed;
         this.rotationSpeed = 0.002;
-        this.yInverted = false; // Controle para inverter o movimento no eixo Y
+        this.yInverted = false;
 
         this.thirdPersonCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
         this.thirdPersonCamera.position.set(0, 5, -10);
@@ -103,7 +104,7 @@ export default class Player extends THREE.Group {
     }
 
     handleMouseDown(button) {
-        if (button === 2) { // Botão direito do mouse
+        if (button === 2) {
             this.jump();
         }
     }
@@ -111,7 +112,13 @@ export default class Player extends THREE.Group {
     jump() {
         if (!this.isJumping && this.playerModel) {
             this.isJumping = true;
-            this.jumpVelocity = 0.15; // Inicializando a força do pulo
+            this.jumpVelocity = 0.15;
+        }
+    }
+
+    fall() {
+        if (this.playerModel) {
+            this.playerModel.position.y += this.gravity * 10;
         }
     }
 
@@ -145,21 +152,30 @@ export default class Player extends THREE.Group {
                 isMoving = true;
             }
 
-            // Atualização da gravidade e salto
+            // Aplicar a física (gravidade e pulo)
             if (this.isJumping) {
                 this.playerModel.position.y += this.jumpVelocity;
                 this.jumpVelocity += this.gravity;
 
-                if (this.playerModel.position.y <= 1.5) {
-                    this.playerModel.position.y = 1.5;
+                // Verificar se o jogador atingiu o chão
+                const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
+                if (this.playerModel.position.y <= groundHeight + 1.5) {
+                    this.playerModel.position.y = groundHeight + 1.5;
                     this.isJumping = false;
+                    this.jumpVelocity = 0;
+                }
+            }
+
+            if (!this.isJumping) {
+                const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
+                if (this.playerModel.position.y > groundHeight + 1.5) {
+                    this.fall();
                 }
             }
 
             if (isMoving) {
                 this.playAnimation('Walking');
                 if (this.mixer) {
-                    // Ajusta a velocidade da animação com base na velocidade do movimento
                     this.mixer.update(0.026 * (this.speed / this.baseSpeed));
                 }
             }
