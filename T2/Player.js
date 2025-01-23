@@ -118,9 +118,23 @@ export default class Player extends THREE.Group {
 
     fall() {
         if (this.playerModel) {
-            this.playerModel.position.y += this.gravity * 10;
+            if (this.fallSpeed < -10) {
+                this.fallSpeed = -10;
+            }
+
+            this.fallSpeed = this.fallSpeed || 0;
+            this.fallSpeed += this.gravity * 10;
+    
+            this.playerModel.position.y += this.fallSpeed;
+    
+            const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
+            if (this.playerModel.position.y <= groundHeight + 1.5) {
+                this.playerModel.position.y = groundHeight + 1.5;
+                this.fallSpeed = 0;
+            }
         }
     }
+
     hasVoxelForward(playerDirection) {
         const direction = new THREE.Vector3();
         playerDirection.getWorldDirection(direction);
