@@ -121,6 +121,60 @@ export default class Player extends THREE.Group {
             this.playerModel.position.y += this.gravity * 10;
         }
     }
+    hasVoxelForward(playerDirection) {
+        const direction = new THREE.Vector3();
+        playerDirection.getWorldDirection(direction);
+        direction.y = 0;
+    
+        return this.world.hasVoxel(
+            Math.floor(playerDirection.position.x + direction.x),
+            Math.floor(playerDirection.position.z + direction.z),
+            Math.floor(playerDirection.position.y) - 1
+        );
+    }
+    
+    hasVoxelBackward(playerDirection) {
+        const direction = new THREE.Vector3();
+        playerDirection.getWorldDirection(direction);
+        direction.y = 0;
+    
+        return this.world.hasVoxel(
+            Math.floor(playerDirection.position.x - direction.x),
+            Math.floor(playerDirection.position.z - direction.z),
+            Math.floor(playerDirection.position.y) - 1
+        );
+    }
+
+    hasVoxelLeft(playerDirection) {
+        const direction = new THREE.Vector3();
+        playerDirection.getWorldDirection(direction);
+        direction.y = 0;
+    
+        const right = new THREE.Vector3();
+        right.crossVectors(direction, playerDirection.up).normalize();
+    
+        return this.world.hasVoxel(
+            Math.floor(playerDirection.position.x - right.x),
+            Math.floor(playerDirection.position.z - right.z),
+            Math.floor(playerDirection.position.y) - 1
+        );
+    }
+    
+    hasVoxelRight(playerDirection) {
+        const direction = new THREE.Vector3();
+        playerDirection.getWorldDirection(direction);
+        direction.y = 0;
+    
+        const right = new THREE.Vector3();
+        right.crossVectors(direction, playerDirection.up).normalize();
+    
+        return this.world.hasVoxel(
+            Math.floor(playerDirection.position.x + right.x),
+            Math.floor(playerDirection.position.z + right.z),
+            Math.floor(playerDirection.position.y) - 1
+        );
+    }
+    
 
     update() {
         if (this.playerModel) {
@@ -135,19 +189,19 @@ export default class Player extends THREE.Group {
             let isMoving = false;
 
             // Movimento horizontal
-            if (this.movement.forward) {
+            if (this.movement.forward && !this.hasVoxelForward(this.playerModel)) {
                 this.playerModel.position.addScaledVector(direction, this.speed);
                 isMoving = true;
             }
-            if (this.movement.backward) {
+            if (this.movement.backward && !this.hasVoxelBackward(this.playerModel) ){
                 this.playerModel.position.addScaledVector(direction, -this.speed);
                 isMoving = true;
             }
-            if (this.movement.left) {
+            if (this.movement.left && !this.hasVoxelLeft(this.playerModel)) {
                 this.playerModel.position.addScaledVector(right, this.speed);
                 isMoving = true;
             }
-            if (this.movement.right) {
+            if (this.movement.right && !this.hasVoxelRight(this.playerModel)) {
                 this.playerModel.position.addScaledVector(right, -this.speed);
                 isMoving = true;
             }

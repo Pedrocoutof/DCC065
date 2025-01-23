@@ -7,9 +7,9 @@ export class World extends THREE.Group {
 
     params = {
         terrains: {
-            scale: 80,
-            magnitude: 0.3,
-            offset: 0.3
+            scale: 100,
+            magnitude: 0.5,
+            offset: 0.5
         },
         biome: {
             sandLevel: 2,
@@ -17,7 +17,7 @@ export class World extends THREE.Group {
         }
     };
 
-    constructor(size = { width: 128, height: 20 }) {
+    constructor(size = { width: 256, height: 20 }) {
         super();
         this.size = size;
         this.initTerrain();
