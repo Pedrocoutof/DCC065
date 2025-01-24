@@ -8,8 +8,8 @@ export class World extends THREE.Group {
     params = {
         terrains: {
             scale: 100,
-            magnitude: 0.5,
-            offset: 0.5
+            magnitude: 0.4,
+            offset: 0.4
         },
         biome: {
             sandLevel: 2,
@@ -24,18 +24,18 @@ export class World extends THREE.Group {
     }
 
     setBlockId(x, y, z, instanceId) {
-        if (this.inBounds(x, y, z)) {
+        if (this.inBounds(x, z, y)) {
             this.data[x][z][y].instanceId = instanceId;
         }
     }
 
     setBlockType(x, y, z, type) {
-        if (this.inBounds(x, y, z)) {
+        if (this.inBounds(x, z, y)) {
             this.data[x][z][y].type = type;
         }
     }
 
-    inBounds(x, y, z) {
+    inBounds(x, z, y) {
         return (
             x >= 0 && x < this.size.width &&
             z >= 0 && z < this.size.width &&
@@ -152,7 +152,7 @@ export class World extends THREE.Group {
                         if (type === 'grass' && Math.random() < 0.003) {
                             if (!this.hasVoxel(x, z, y + 1)) {
                                 const terrainHeight = this.getHeightByXZ(x, z);
-                                const tree = this.generateRandomThree(x + 0.5, terrainHeight + 0.5, z + 0.5);
+                                const tree = this.generateRandomThree(Math.floor(x), terrainHeight, Math.floor(z));
                                 this.add(tree);
                             }
                         }
@@ -170,19 +170,58 @@ export class World extends THREE.Group {
         this.add(stoneMesh);
         this.add(sandMesh);
     }
-
     generateRandomThree(x, y, z) {
         let rand = Math.random();
     
+        // Definindo os voxels da árvore na matriz
         if (rand < 0.33) {
+            this.setTreeVoxel(x, y, z, 'autumn');
             return this.autumnThree(x, y, z);
         } else if (rand < 0.66) {
+            this.setTreeVoxel(x, y, z, 'oak');
             return this.oakThree(x, y, z);
         } else {
+            this.setTreeVoxel(x, y, z, 'default');
             return this.defaultThree(x, y, z);
         }
-    }    
-
+    }
+    
+    setTreeVoxel(x, y, z, type) {
+        if (type === 'autumn') {
+            // Tronco
+            this.setBlockType(x, y, z, 'tree');
+            this.setBlockType(x, y + 1, z, 'tree');
+            this.setBlockType(x, y + 2, z, 'tree');
+            
+            // Foliagem
+            this.setBlockType(x - 1, y + 3, z - 1, 'tree');
+            this.setBlockType(x + 1, y + 3, z + 1, 'tree');
+            this.setBlockType(x, y + 3, z, 'tree');
+        } else if (type === 'oak') {
+            // Tronco
+            this.setBlockType(x, y, z, 'tree');
+            this.setBlockType(x, y + 1, z, 'tree');
+            this.setBlockType(x, y + 2, z, 'tree');
+            
+            // Foliagem
+            this.setBlockType(x, y + 3, z, 'tree');
+            this.setBlockType(x - 1, y + 3, z, 'tree');
+            this.setBlockType(x + 1, y + 3, z, 'tree');
+            this.setBlockType(x, y + 4, z, 'tree');
+        } else if (type === 'default') {
+            // Tronco
+            this.setBlockType(x, y, z, 'tree');
+            this.setBlockType(x, y + 1, z, 'tree');
+            this.setBlockType(x, y + 2, z, 'tree');
+            
+            // Foliagem
+            this.setBlockType(x, y + 3, z, 'tree');
+            this.setBlockType(x - 1, y + 3, z, 'tree');
+            this.setBlockType(x + 1, y + 3, z, 'tree');
+            this.setBlockType(x, y + 4, z, 'tree');
+        }
+    }
+    
     autumnThree(x, y, z) {
         const trunkGeometry = new THREE.BoxGeometry(1, 3, 1);
         const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });

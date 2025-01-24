@@ -135,31 +135,37 @@ export default class Player extends THREE.Group {
         }
     }
 
-    hasVoxelForward(playerDirection) {
+    canMoveForward(playerDirection) {
         const direction = new THREE.Vector3();
         playerDirection.getWorldDirection(direction);
         direction.y = 0;
-    
-        return this.world.hasVoxel(
-            Math.floor(playerDirection.position.x + direction.x),
-            Math.floor(playerDirection.position.z + direction.z),
-            Math.floor(playerDirection.position.y) - 1
-        );
+
+        const x = Math.floor(playerDirection.position.x + direction.x);
+        const z = Math.floor(playerDirection.position.z + direction.z);
+        const y = Math.floor(playerDirection.position.y) - 1;
+
+        if(this.world.inBounds(x,z,y)) {
+            return this.world.hasVoxel(x,z,y)
+        }
+        return true;
     }
     
-    hasVoxelBackward(playerDirection) {
+    canMoveBackward(playerDirection) {
         const direction = new THREE.Vector3();
         playerDirection.getWorldDirection(direction);
         direction.y = 0;
-    
-        return this.world.hasVoxel(
-            Math.floor(playerDirection.position.x - direction.x),
-            Math.floor(playerDirection.position.z - direction.z),
-            Math.floor(playerDirection.position.y) - 1
-        );
+
+        const x = Math.floor(playerDirection.position.x - direction.x);
+        const z = Math.floor(playerDirection.position.z - direction.z);
+        const y = Math.floor(playerDirection.position.y) - 1;
+
+        if(this.world.inBounds(x,z,y)) {
+            return this.world.hasVoxel(x,z,y)
+        }
+        return true;
     }
 
-    hasVoxelLeft(playerDirection) {
+    canMoveLeft(playerDirection) {
         const direction = new THREE.Vector3();
         playerDirection.getWorldDirection(direction);
         direction.y = 0;
@@ -167,14 +173,17 @@ export default class Player extends THREE.Group {
         const right = new THREE.Vector3();
         right.crossVectors(direction, playerDirection.up).normalize();
     
-        return this.world.hasVoxel(
-            Math.floor(playerDirection.position.x - right.x),
-            Math.floor(playerDirection.position.z - right.z),
-            Math.floor(playerDirection.position.y) - 1
-        );
+        const x = Math.floor(playerDirection.position.x - right.x);
+        const z = Math.floor(playerDirection.position.z - right.z);
+        const y = Math.floor(playerDirection.position.y) - 1;
+        
+        if(this.world.inBounds(x,z,y)) {
+            return this.world.hasVoxel(x,z,y)
+        }
+        return true;
     }
     
-    hasVoxelRight(playerDirection) {
+    canMoveRight(playerDirection) {
         const direction = new THREE.Vector3();
         playerDirection.getWorldDirection(direction);
         direction.y = 0;
@@ -182,11 +191,14 @@ export default class Player extends THREE.Group {
         const right = new THREE.Vector3();
         right.crossVectors(direction, playerDirection.up).normalize();
     
-        return this.world.hasVoxel(
-            Math.floor(playerDirection.position.x + right.x),
-            Math.floor(playerDirection.position.z + right.z),
-            Math.floor(playerDirection.position.y) - 1
-        );
+        const x = Math.floor(playerDirection.position.x + right.x);
+        const z = Math.floor(playerDirection.position.z + right.z);
+        const y = Math.floor(playerDirection.position.y) - 1;
+        
+        if(this.world.inBounds(x,z,y)) {
+            return this.world.hasVoxel(x,z,y)
+        }
+        return true;
     }
     
 
@@ -203,19 +215,19 @@ export default class Player extends THREE.Group {
             let isMoving = false;
 
             // Movimento horizontal
-            if (this.movement.forward && !this.hasVoxelForward(this.playerModel)) {
+            if (this.movement.forward && !this.canMoveForward(this.playerModel)) {
                 this.playerModel.position.addScaledVector(direction, this.speed);
                 isMoving = true;
             }
-            if (this.movement.backward && !this.hasVoxelBackward(this.playerModel) ){
+            if (this.movement.backward && !this.canMoveBackward(this.playerModel) ){
                 this.playerModel.position.addScaledVector(direction, -this.speed);
                 isMoving = true;
             }
-            if (this.movement.left && !this.hasVoxelLeft(this.playerModel)) {
+            if (this.movement.left && !this.canMoveLeft(this.playerModel)) {
                 this.playerModel.position.addScaledVector(right, this.speed);
                 isMoving = true;
             }
-            if (this.movement.right && !this.hasVoxelRight(this.playerModel)) {
+            if (this.movement.right && !this.canMoveRight(this.playerModel)) {
                 this.playerModel.position.addScaledVector(right, -this.speed);
                 isMoving = true;
             }
