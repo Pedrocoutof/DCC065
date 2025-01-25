@@ -8,7 +8,7 @@ import Player from "./Player.js";
 
 let scene = new THREE.Scene();
 let renderer = initRenderer('#6EB1FF');
-let camera = initCamera(new THREE.Vector3(160, 30, 160));
+let camera = initCamera(new THREE.Vector3(160, 40, 160));
 let material = setDefaultMaterial();
 let light = initDefaultBasicLight(scene);
 let orbit = new OrbitControls(camera, renderer.domElement);
@@ -24,7 +24,7 @@ scene.add(player);
 player.loadModel(
     world.getCenterMap().x,
     world.getCenterMap().z,
-    world.getHeightByXZ(world.getCenterMap().x, world.getCenterMap().z)
+    world.getHeightByXZ(world.getCenterMap().x, world.getCenterMap().z) + 1
 );
 
 let activeCamera = camera;

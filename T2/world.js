@@ -144,7 +144,7 @@ export class World extends THREE.Group {
             for (let z = 0; z < this.size.width; z++) {
                 for (let y = 0; y < this.size.height; y++) {
                     if (this.data[x][z][y].instanceId !== null) {
-                        matrix.setPosition(x + 0.5, y + 0.5, z + 0.5);
+                        matrix.setPosition(x, y, z);
     
                         const type = this.data[x][z][y].type;
                         const mesh = typesMeshes[type];
@@ -152,7 +152,7 @@ export class World extends THREE.Group {
                         if (type === 'grass' && Math.random() < 0.003) {
                             if (!this.hasVoxel(x, z, y + 1)) {
                                 const terrainHeight = this.getHeightByXZ(x, z);
-                                const tree = this.generateRandomThree(Math.floor(x), terrainHeight, Math.floor(z));
+                                const tree = this.generateRandomThree(x, terrainHeight, z);
                                 this.add(tree);
                             }
                         }
@@ -170,55 +170,18 @@ export class World extends THREE.Group {
         this.add(stoneMesh);
         this.add(sandMesh);
     }
+
     generateRandomThree(x, y, z) {
         let rand = Math.random();
+        const offset = 0;
     
         // Definindo os voxels da árvore na matriz
         if (rand < 0.33) {
-            this.setTreeVoxel(x, y, z, 'autumn');
-            return this.autumnThree(x, y, z);
+            return this.autumnThree(x + offset, y + offset, z + offset);
         } else if (rand < 0.66) {
-            this.setTreeVoxel(x, y, z, 'oak');
-            return this.oakThree(x, y, z);
+            return this.oakThree(x + offset, y + offset, z + offset);
         } else {
-            this.setTreeVoxel(x, y, z, 'default');
-            return this.defaultThree(x, y, z);
-        }
-    }
-    
-    setTreeVoxel(x, y, z, type) {
-        if (type === 'autumn') {
-            // Tronco
-            this.setBlockType(x, y, z, 'tree');
-            this.setBlockType(x, y + 1, z, 'tree');
-            this.setBlockType(x, y + 2, z, 'tree');
-            
-            // Foliagem
-            this.setBlockType(x - 1, y + 3, z - 1, 'tree');
-            this.setBlockType(x + 1, y + 3, z + 1, 'tree');
-            this.setBlockType(x, y + 3, z, 'tree');
-        } else if (type === 'oak') {
-            // Tronco
-            this.setBlockType(x, y, z, 'tree');
-            this.setBlockType(x, y + 1, z, 'tree');
-            this.setBlockType(x, y + 2, z, 'tree');
-            
-            // Foliagem
-            this.setBlockType(x, y + 3, z, 'tree');
-            this.setBlockType(x - 1, y + 3, z, 'tree');
-            this.setBlockType(x + 1, y + 3, z, 'tree');
-            this.setBlockType(x, y + 4, z, 'tree');
-        } else if (type === 'default') {
-            // Tronco
-            this.setBlockType(x, y, z, 'tree');
-            this.setBlockType(x, y + 1, z, 'tree');
-            this.setBlockType(x, y + 2, z, 'tree');
-            
-            // Foliagem
-            this.setBlockType(x, y + 3, z, 'tree');
-            this.setBlockType(x - 1, y + 3, z, 'tree');
-            this.setBlockType(x + 1, y + 3, z, 'tree');
-            this.setBlockType(x, y + 4, z, 'tree');
+            return this.defaultThree(x + offset, y + offset, z + offset);
         }
     }
     
@@ -241,6 +204,7 @@ export class World extends THREE.Group {
     
         return tree;
     }
+    
     defaultThree(x, y, z) {
         const trunkMaterial = new THREE.MeshLambertMaterial({ color: "brown" });
         const foliageMaterial = new THREE.MeshLambertMaterial({ color: "green" });
@@ -249,6 +213,7 @@ export class World extends THREE.Group {
         for (let i = 0; i < 3; i++) {
             const trunkCube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), trunkMaterial);
             trunkCube.position.set(x, y + i, z);
+            this.setBlockId(x,y,z,1)
             trunk.add(trunkCube);
         }
     

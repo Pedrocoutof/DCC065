@@ -29,8 +29,8 @@ export default class Player extends THREE.Group {
             "./assets/steve.glb",
             (gltf) => {
                 this.playerModel = gltf.scene;
-                this.playerModel.scale.set(0.75, 0.75, 0.75);
-                this.playerModel.position.set(x, y + 1.5, z);
+                this.playerModel.scale.set(1, 1, 1);
+                this.playerModel.position.set(x, y, z);
                 this.add(this.playerModel);
 
                 this.mixer = new THREE.AnimationMixer(this.playerModel);
@@ -239,8 +239,8 @@ export default class Player extends THREE.Group {
 
                 // Verificar se o jogador atingiu o chão
                 const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
-                if (this.playerModel.position.y <= groundHeight + 1.5) {
-                    this.playerModel.position.y = groundHeight + 1.5;
+                if (this.playerModel.position.y <= groundHeight + 1) {
+                    this.playerModel.position.y = groundHeight + 1;
                     this.isJumping = false;
                     this.jumpVelocity = 0;
                 }
@@ -248,7 +248,7 @@ export default class Player extends THREE.Group {
 
             if (!this.isJumping) {
                 const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
-                if (this.playerModel.position.y > groundHeight + 1.5) {
+                if (this.playerModel.position.y > groundHeight + 1) {
                     this.fall();
                 }
             }
