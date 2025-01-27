@@ -53,11 +53,15 @@ export default class Player extends THREE.Group {
     }
 
     updateCameraRotation(movementX, movementY) {
+        // Certifique-se de que os valores de movimento são válidos
+    
+        // Cálculo da rotação vertical (Y) com inversão caso necessário
         const rotationY = this.yInverted ? -movementY * this.rotationSpeed : movementY * this.rotationSpeed;
-
-        // Rotação no eixo horizontal (Y)
-        this.thirdPersonCamera.rotation.y -= movementX * this.rotationSpeed;
-
+    
+        // Aplicando rotação horizontal (em torno do eixo Y)
+        const rotationAxisY = new THREE.Vector3(0, 1, 0); // Eixo Y (horizontal)
+        this.thirdPersonCamera.rotateOnAxis(rotationAxisY, -movementX * this.rotationSpeed);
+    
         // Limitação da rotação no eixo vertical (X)
         const maxVerticalAngle = Math.PI / 2.5; // (~72°)
         const minVerticalAngle = -Math.PI / 2.5; // (~-72°)
@@ -66,12 +70,17 @@ export default class Player extends THREE.Group {
             minVerticalAngle,
             maxVerticalAngle
         );
-
-        // Sincronização com o modelo do personagem
+    
+        // Sincronização com o modelo do personagem, ajustando também a rotação horizontal
         if (this.playerModel) {
             this.playerModel.rotation.y -= movementX * this.rotationSpeed;
         }
+    
+        // Depuração para verificar a rotação
     }
+    
+    
+
 
     handleKeyDown(key) {
         switch (key.toLowerCase()) {
