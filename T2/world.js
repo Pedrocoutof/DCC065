@@ -234,7 +234,6 @@ buildModeling(data, basePosition) {
 
         // Criando o mesh do voxel
         const mesh = new THREE.Mesh(geometry, voxelMaterial);
-        console.log(mesh);  // Verifique se o mesh é realmente um THREE.Mesh
 
         // Garantir que o mesh é um objeto válido e é do tipo correto
         if (mesh instanceof THREE.Mesh) {
@@ -244,6 +243,12 @@ buildModeling(data, basePosition) {
                 voxelData.position.y + basePosition.y,
                 voxelData.position.z + basePosition.z
             );
+
+            this.setBlockId(
+              Math.floor(voxelData.position.x + basePosition.x),
+              Math.floor(voxelData.position.y + basePosition.y),
+              Math.floor(voxelData.position.z + basePosition.z),
+            1)
 
             // Garantir que a cena é válida
            // if (scene instanceof THREE.Scene) {
