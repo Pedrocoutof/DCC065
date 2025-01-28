@@ -33,6 +33,14 @@ export default class Player extends THREE.Group {
                 this.playerModel.position.set(x, y + 1.5, z);
                 this.add(this.playerModel);
 
+                // Habilita sombra para o modelo do jogador
+                this.playerModel.traverse((child) => {
+                    if (child.isMesh) {
+                        child.castShadow = true;  // Gera sombra
+                        child.receiveShadow = true;  // Recebe sombra
+                    }
+                });
+    
                 this.mixer = new THREE.AnimationMixer(this.playerModel);
                 gltf.animations.forEach((clip) => {
                     this.mixer.clipAction(clip).play();
@@ -78,9 +86,6 @@ export default class Player extends THREE.Group {
     
         // Depuração para verificar a rotação
     }
-    
-    
-
 
     handleKeyDown(key) {
         switch (key.toLowerCase()) {
@@ -209,7 +214,6 @@ export default class Player extends THREE.Group {
         }
         return true;
     }
-    
 
     update() {
         if (this.playerModel) {

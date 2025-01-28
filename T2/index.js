@@ -7,10 +7,31 @@ import GlobalConfig from "./GlobalConfig.js";
 import Player from "./Player.js";
 
 let scene = new THREE.Scene();
-let renderer = initRenderer('#6EB1FF');
+let renderer = initRenderer('#6EB1FF', THREE.PCFSoftShadowMap);
+renderer.shadowMap.enabled = true;
+renderer.setPixelRatio(window.devicePixelRatio);
+
+const ambientLight = new THREE.AmbientLight(0x5c5943);
+scene.add(ambientLight);
+const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 5);
+dirLight.position.set(264, 60, 128);
+dirLight.lookAt(new THREE.Vector3(128, 0 , 128));
+dirLight.castShadow = true;
+
+dirLight.shadow.mapSize.set(1024, 1024);
+dirLight.shadow.camera.near = 0.1;
+dirLight.shadow.camera.far = 4056;
+dirLight.shadow.camera.left = -256;
+dirLight.shadow.camera.right = 256;
+dirLight.shadow.camera.top = 0;
+dirLight.shadow.camera.bottom = -50;
+dirLight.shadow.bias = 0.00011;
+
+scene.add(dirLight);
+scene.add(dirLightHelper);
+
 let camera = initCamera(new THREE.Vector3(160, 30, 160));
-let material = setDefaultMaterial();
-let light = initDefaultBasicLight(scene);
 let orbit = new OrbitControls(camera, renderer.domElement);
 
 const world = new World();
@@ -94,6 +115,7 @@ function render() {
     stats.update();
     requestAnimationFrame(render);
     renderer.render(scene, activeCamera);
+
 }
 
 render();

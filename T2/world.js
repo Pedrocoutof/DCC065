@@ -1,11 +1,7 @@
 import * as THREE from "three";
 import { SimplexNoise } from "simplexNoise";
 import {
-    initRenderer,
-    initCamera,
-    createGroundPlaneXZ,
-    initDefaultBasicLight,
-    setDefaultMaterial,
+    setDefaultMaterial
   } from "util";
 
 export class World extends THREE.Group {
@@ -130,6 +126,11 @@ export class World extends THREE.Group {
     const maxCount = this.size.width * this.size.width * this.size.height;
     const voxelGeometry = new THREE.BoxGeometry(1, 1, 1);
     const voxelMaterial = new THREE.MeshLambertMaterial({ color: color });
+    
+    voxelMaterial.receiveShadow = true;
+    voxelMaterial.castShadow = true;
+    voxelMaterial.fog = true;
+    
     const mesh = new THREE.InstancedMesh(
       voxelGeometry,
       voxelMaterial,
@@ -179,6 +180,8 @@ export class World extends THREE.Group {
             }
 
             if (mesh) {
+              mesh.castShadow = true;
+              mesh.receiveShadow = true;
               mesh.setMatrixAt(mesh.count++, matrix);
             }
           }
@@ -243,6 +246,8 @@ buildModeling(data, basePosition) {
                 voxelData.position.y + basePosition.y,
                 voxelData.position.z + basePosition.z
             );
+            mesh.castShadow = true;
+            mesh.receiveShadow = true;
 
             this.setBlockId(
               Math.floor(voxelData.position.x + basePosition.x),
