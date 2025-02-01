@@ -1,5 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
+import { CameraHelper } from 'three';
+
 export default class Player extends THREE.Group {
     constructor(world) {
         super();
@@ -13,8 +15,8 @@ export default class Player extends THREE.Group {
         };
         this.isJumping = false;
         this.jumpVelocity = 0;
-        this.gravity = -0.005;
-        this.baseSpeed = 0.1;
+        this.gravity = -0.008;
+        this.baseSpeed = 0.18;
         this.speed = this.baseSpeed;
         this.rotationSpeed = 0.002;
         this.yInverted = false;
@@ -45,6 +47,11 @@ export default class Player extends THREE.Group {
         this.cameraVerticalAngle = 0; // Ângulo vertical da câmera
         this.maxVerticalAngle = Math.PI / 4; // Limite máximo de rotação vertical (45 graus)
         this.minVerticalAngle = -Math.PI / 4; // Limite mínimo de rotação vertical (-45 graus)
+
+        this.dirLight = null;
+        // this.dirLightHelper = new THREE.DirectionalLightHelper(this.dirLight);
+        
+        this.dirLightTarget = new THREE.Object3D();
     }
 
     loadModel(x, z, y) {
@@ -70,6 +77,12 @@ export default class Player extends THREE.Group {
                 });
             }
         );
+        this.initDirLight()
+        this.dirLightTarget.position.set(x, y, z);
+        this.dirLight.target = this.dirLightTarget;
+        this.add(this.dirLight);
+        // this.add(this.dirLightHelper);
+        this.add(this.dirLightTarget)
     }
 
     updateCameraPosition() {
@@ -311,25 +324,62 @@ export default class Player extends THREE.Group {
             }
 
             if (isMoving) {
-                this.playAnimation('Walking');
                 if (this.mixer) {
                     this.mixer.update(0.026 * (this.speed / this.baseSpeed));
                 }
             }
-
+            this.updateDirLightPosition();
             this.updateCameraPosition();
         }
     }
 
-    playAnimation(animationName) {
-        if (this.mixer) {
-            const action = this.mixer.clipAction(animationName);
-            if (action) {
-                action.play();
-            }
+    updateDirLightPosition() {
+        this.dirLightTarget.position.set(this.playerModel.position.x, this.playerModel.position.y, this.playerModel.position.z);
+        this.dirLight.position.set(this.playerModel.position.x, this.playerModel.position.y + 50, this.playerModel.position.z + 30);
+        this.dirLight.target = this.dirLightTarget;
+    }
+    
+    toggleShadowHelperVisibility() {
+        if (this.dirLightHelper.visible) {
+            this.dirLightHelper.visible = false;
+        } else {
+            this.dirLightHelper.visible = true;
         }
     }
-     toggleYInversion(){
+    toggleYInversion(){
         this.yInverted = !this.yInverted
+    }
+
+    changeShadowMapVolume(fogValue) {
+        const size = Math.max(Math.min(fogValue, 250), 0);
+        console.log(size)
+        this.dirLight.shadow.camera.left = -size;
+        this.dirLight.shadow.camera.right = size;
+        this.dirLight.shadow.camera.top = size;
+        this.dirLight.shadow.camera.bottom = -size;
+
+        if(fogValue > 135) {
+            this.dirLight.shadow.bias = 0.0001;
+        }
+    
+        this.dirLight.shadow.camera.updateProjectionMatrix();
+        this.dirLightHelper.update();
+    }
+    
+    initDirLight() {
+        this.dirLight = new THREE.DirectionalLight('white', 1);
+        this.dirLight.position.set(128, 100, 128);
+        this.dirLight.castShadow = true;
+        this.dirLight.shadow.mapSize = new THREE.Vector2(4096, 4096)
+        this.dirLight.shadow.radius=0.2;
+        this.dirLight.shadow.blurSamples=2;
+        this.dirLight.shadow.camera.near = 0.1;
+        this.dirLight.shadow.camera.far = 80;
+        this.dirLight.shadow.camera.left = -20;
+        this.dirLight.shadow.camera.right = 20;
+        this.dirLight.shadow.camera.top = 20;
+        this.dirLight.shadow.camera.bottom = -20;
+        this.dirLightHelper = new CameraHelper(this.dirLight.shadow.camera);
+        this.add(this.dirLightHelper);
     }
 }

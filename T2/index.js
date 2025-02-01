@@ -7,29 +7,12 @@ import GlobalConfig from "./GlobalConfig.js";
 import Player from "./Player.js";
 
 let scene = new THREE.Scene();
-let renderer = initRenderer('#6EB1FF', THREE.BasicShadowMap);
+let renderer = initRenderer('#6EB1FF', THREE.PCFSoftShadowMap);
 renderer.shadowMap.enabled = true;
 renderer.setPixelRatio(window.devicePixelRatio);
 
 const ambientLight = new THREE.AmbientLight(0xa19c75);
 scene.add(ambientLight);
-const dirLight = new THREE.DirectionalLight(0xffffff, 2);
-const dirLightHelper = new THREE.DirectionalLightHelper(dirLight, 5);
-dirLight.position.set(264, 60, 128);
-dirLight.lookAt(new THREE.Vector3(128, 0 , 128));
-dirLight.castShadow = true;
-
-dirLight.shadow.mapSize.set(2048, 2048);
-dirLight.shadow.camera.near = 0.1;
-dirLight.shadow.camera.far = 4056;
-dirLight.shadow.camera.left = -256;
-dirLight.shadow.camera.right = 256;
-dirLight.shadow.camera.top = 0;
-dirLight.shadow.camera.bottom = -50;
-dirLight.shadow.bias = -0.00005;
-
-scene.add(dirLight);
-scene.add(dirLightHelper);
 
 let camera = initCamera(new THREE.Vector3(160, 30, 160));
 let orbit = new OrbitControls(camera, renderer.domElement);
@@ -53,7 +36,9 @@ let activeCamera = camera;
 const { stats } = buildInterface((type, value) => {
     if (type === 'fog') {
         scene.fog.near = value;
-        scene.fog.far = value + 50;
+        scene.fog.far = value + 30;
+        console.log(value)
+        player.changeShadowMapVolume(value)
     }
 });
 
@@ -65,6 +50,9 @@ window.addEventListener('keydown', (event) => {
         case 'y':
             player.toggleYInversion();
             break;
+        case 'h':
+            player.toggleShadowHelperVisibility();
+            break;
         default:
             player.handleKeyDown(event.key);
             break;
@@ -74,6 +62,7 @@ window.addEventListener('mousedown', (event) => {
     switch (event.button) {
         case 2: // Botão direito do mouse
             player.jump(); // Chama o método de pulo do jogador
+            dirLightTarget.position.set(0, 0, 0);
             break;
     }
 });
@@ -115,7 +104,6 @@ function render() {
     stats.update();
     requestAnimationFrame(render);
     renderer.render(scene, activeCamera);
-
 }
 
 render();
