@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'OrbitControls';
-import { initRenderer, initCamera, initDefaultBasicLight, setDefaultMaterial } from 'util';
+import { initRenderer, initCamera } from 'util';
 import { buildInterface } from 'ui';
 import { World } from 'world';
 import GlobalConfig from "./GlobalConfig.js";
@@ -21,7 +21,7 @@ const world = new World();
 world.generate();
 scene.add(world);
 orbit.target.set(world.getCenterMap().x, 0, world.getCenterMap().z);
-scene.fog = new THREE.Fog(0x6EB1FF, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
+scene.fog = new THREE.Fog(GlobalConfig.fogColor, GlobalConfig.fogValue, GlobalConfig.fogValue + 25);
 
 const player = new Player(world);
 scene.add(player);
@@ -58,10 +58,11 @@ window.addEventListener('keydown', (event) => {
             break;
     }
 });
+
 window.addEventListener('mousedown', (event) => {
     switch (event.button) {
-        case 2: // Botão direito do mouse
-            player.jump(); // Chama o método de pulo do jogador
+        case 2:
+            player.jump();
             dirLightTarget.position.set(0, 0, 0);
             break;
     }

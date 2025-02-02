@@ -198,7 +198,6 @@ export class World extends THREE.Group {
     let rand = Math.random();
     let basePosition = { x, y, z };
 
-    // Definindo os voxels da árvore na matriz
     if (rand < 0.33) {
         return this.loadTreeFromFile("./assets/autumn.json", basePosition);
     } else if (rand < 0.66) {
@@ -215,7 +214,7 @@ async loadTreeFromFile(fileName, basePosition) {
             throw new Error(`Erro ao carregar o arquivo: ${fileName}`);
         }
         const treeData = await response.json();
-        this.buildModeling(treeData, basePosition);  // Chama a função de modelagem após o carregamento
+        this.buildModeling(treeData, basePosition);
     } catch (error) {
         console.error("Erro ao carregar a árvore:", error);
     }
@@ -223,24 +222,19 @@ async loadTreeFromFile(fileName, basePosition) {
 
 buildModeling(data, basePosition) {
     data.forEach((voxelData) => {
-        // Criação da geometria do voxel
         const geometry = new THREE.BoxGeometry(
             voxelData.additionalData.width,
             voxelData.additionalData.height,
             voxelData.additionalData.depth
         );
 
-        // Usando a função setDefaultMaterial para criar o material do voxel
         const voxelMaterial = setDefaultMaterial(
-            voxelData.materialProps.color || 0xffffff  // Cor padrão: branco
+            voxelData.materialProps.color || 0xffffff
         );
 
-        // Criando o mesh do voxel
         const mesh = new THREE.Mesh(geometry, voxelMaterial);
 
-        // Garantir que o mesh é um objeto válido e é do tipo correto
         if (mesh instanceof THREE.Mesh) {
-            // Posicionando o mesh na cena
             mesh.position.set(
                 voxelData.position.x + basePosition.x,
                 voxelData.position.y + basePosition.y,
@@ -253,16 +247,9 @@ buildModeling(data, basePosition) {
               Math.floor(voxelData.position.x + basePosition.x),
               Math.floor(voxelData.position.y + basePosition.y),
               Math.floor(voxelData.position.z + basePosition.z),
-            1)
+              1)
 
-            // Garantir que a cena é válida
-           // if (scene instanceof THREE.Scene) {
-                this.add(mesh);  // Adiciona o mesh à cena
-            //} else {
-                //console.error("A cena não está inicializada corretamente.");
-            //}
-        //} else {
-            //console.error("O objeto mesh não é uma instância de THREE.Mesh.");
+          this.add(mesh);
         }
     });
 }
@@ -270,28 +257,23 @@ buildModeling(data, basePosition) {
 
 
   createTreeFromData(data, x, y, z) {
-    // Iterando sobre os dados JSON e criando voxels para cada item
     data.forEach((item) => {
       const posX = x + item.position.x;
       const posY = y + item.position.y;
       const posZ = z + item.position.z;
 
-      // Aplique as propriedades do material e dados adicionais
       const materialProps = item.materialProps;
       const additionalData = item.additionalData;
 
-      // Exemplo de como você pode configurar os voxels com base nos dados
       this.setVoxel(posX, posY, posZ, materialProps.color, additionalData);
     });
   }
 
   setVoxel(x, y, z, color, additionalData) {
-    // Função para definir o voxel no mundo com base nas propriedades
     console.log(
       `Definindo voxel em (${x}, ${y}, ${z}) com cor ${color} e dados adicionais:`,
       additionalData
     );
-    // Aqui você deve integrar o código que realmente cria o voxel no mundo, com a cor e outras propriedades
   }
 
   setTreeVoxel(x, y, z, type) {

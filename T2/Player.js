@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
 import { CameraHelper } from 'three';
+import GlobalConfig from "./GlobalConfig.js";
 
 export default class Player extends THREE.Group {
     constructor(world) {
@@ -15,41 +16,36 @@ export default class Player extends THREE.Group {
         };
         this.isJumping = false;
         this.jumpVelocity = 0;
-        this.gravity = -0.008;
         this.baseSpeed = 0.18;
         this.speed = this.baseSpeed;
         this.rotationSpeed = 0.002;
         this.yInverted = false;
 
-        // Câmera
         this.thirdPersonCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
-        this.thirdPersonCamera.position.set(0, 5, -10); // Posição inicial da câmera (atrás do personagem)
+        this.thirdPersonCamera.position.set(0, 5, -10);
         this.add(this.thirdPersonCamera);
 
-        // Objeto de referência (à frente do personagem)
         this.referenceObject = new THREE.Mesh(
             new THREE.SphereGeometry(0.5, 16, 16),
-            new THREE.MeshBasicMaterial({ 
-                color: 0xff0000, // Cor do objeto (pode ser qualquer cor)
-                transparent: true, // Habilita a transparência
-                opacity: 0.0 // Define a opacidade (0 = totalmente transparente, 1 = totalmente opaco)
+            new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0.0
             })
         );
-        this.referenceObject.position.set(0, 0, 5); // Posição inicial à frente do personagem
+        this.referenceObject.position.set(0, 0, 5);
         this.add(this.referenceObject);
 
         this.cameraTarget = new THREE.Vector3();
         this.mixer = null;
 
-        // Ângulo de rotação da câmera e do objeto de referência
-        this.cameraAngle = 0; // Ângulo inicial da câmera
-        this.verticalOffset = 0; // Deslocamento vertical da esfera
-        this.cameraVerticalAngle = 0; // Ângulo vertical da câmera
-        this.maxVerticalAngle = Math.PI / 4; // Limite máximo de rotação vertical (45 graus)
-        this.minVerticalAngle = -Math.PI / 4; // Limite mínimo de rotação vertical (-45 graus)
+        this.cameraAngle = 0;
+        this.verticalOffset = 0;
+        this.cameraVerticalAngle = 0;
+        this.maxVerticalAngle = Math.PI / 4;
+        this.minVerticalAngle = -Math.PI / 4;
 
         this.dirLight = null;
-        // this.dirLightHelper = new THREE.DirectionalLightHelper(this.dirLight);
         
         this.dirLightTarget = new THREE.Object3D();
     }
@@ -63,11 +59,10 @@ export default class Player extends THREE.Group {
                 this.playerModel.position.set(x, y + 1.5, z);
                 this.add(this.playerModel);
 
-                // Habilita sombra para o modelo do jogador
                 this.playerModel.traverse((child) => {
                     if (child.isMesh) {
-                        child.castShadow = true;  // Gera sombra
-                        child.receiveShadow = true;  // Recebe sombra
+                        child.castShadow = true;
+                        child.receiveShadow = true;
                     }
                 });
     
@@ -81,30 +76,27 @@ export default class Player extends THREE.Group {
         this.dirLightTarget.position.set(x, y, z);
         this.dirLight.target = this.dirLightTarget;
         this.add(this.dirLight);
-        // this.add(this.dirLightHelper);
         this.add(this.dirLightTarget)
     }
 
     updateCameraPosition() {
         if (this.playerModel) {
-            const radius = 10; // Distância da câmera e do objeto de referência ao personagem
-            const height = 5; // Altura da câmera em relação ao personagem
+            const radius = 10;
+            const height = 5;
 
-            // Atualizar a posição do objeto de referência (à frente do personagem)
             this.referenceObject.position.set(
                 this.playerModel.position.x + radius * Math.sin(this.playerModel.rotation.y),
-                this.playerModel.position.y + this.verticalOffset, // Aplicar deslocamento vertical
+                this.playerModel.position.y + this.verticalOffset,
                 this.playerModel.position.z + radius * Math.cos(this.playerModel.rotation.y)
             );
 
-            // Atualizar a posição da câmera (atrás do personagem)
+
             this.thirdPersonCamera.position.set(
                 this.playerModel.position.x - radius * Math.sin(this.playerModel.rotation.y),
-                this.playerModel.position.y + height + Math.sin(this.cameraVerticalAngle) * radius, // Ajustar altura com base no ângulo vertical
+                this.playerModel.position.y + height + Math.sin(this.cameraVerticalAngle) * radius,
                 this.playerModel.position.z - radius * Math.cos(this.playerModel.rotation.y)
             );
 
-            // A câmera sempre aponta para o objeto de referência
             this.thirdPersonCamera.lookAt(this.referenceObject.position);
         }
     }
@@ -114,16 +106,13 @@ export default class Player extends THREE.Group {
             return;
         }
     
-        // Movimento no eixo X: gira o personagem e a câmera
         const rotationY = movementX * this.rotationSpeed;
         if (this.playerModel) {
             this.playerModel.rotation.y -= rotationY;
         }
     
-        // Inverter o movimento no eixo Y se yInverted for true
         const verticalMovement = this.yInverted ? -movementY : movementY;
     
-        // Movimento no eixo Y: ajusta o ângulo vertical da câmera
         this.cameraVerticalAngle -= verticalMovement * this.rotationSpeed;
         this.cameraVerticalAngle = THREE.MathUtils.clamp(
             this.cameraVerticalAngle,
@@ -131,7 +120,6 @@ export default class Player extends THREE.Group {
             this.maxVerticalAngle
         );
     
-        // Atualizar a posição da câmera e do objeto de referência
         this.updateCameraPosition();
     }
 
@@ -183,6 +171,18 @@ export default class Player extends THREE.Group {
         }
     }
 
+    toggleShadowHelperVisibility() {
+        if (this.dirLightHelper.visible) {
+            this.dirLightHelper.visible = false;
+        } else {
+            this.dirLightHelper.visible = true;
+        }
+    }
+
+    toggleYInversion(){
+        this.yInverted = !this.yInverted
+    }
+
     jump() {
         if (!this.isJumping && this.playerModel) {
             this.isJumping = true;
@@ -197,8 +197,8 @@ export default class Player extends THREE.Group {
             }
 
             this.fallSpeed = this.fallSpeed || 0;
-            this.fallSpeed += this.gravity * 10;
-    
+            this.fallSpeed += GlobalConfig.gravity * 10;
+
             this.playerModel.position.y += this.fallSpeed;
     
             const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
@@ -209,68 +209,36 @@ export default class Player extends THREE.Group {
         }
     }
 
-    canMoveForward(playerDirection) {
+    canMove(playerDirection, directionType) {
         const direction = new THREE.Vector3();
         playerDirection.getWorldDirection(direction);
         direction.y = 0;
-
-        const x = Math.floor(playerDirection.position.x + direction.x);
-        const z = Math.floor(playerDirection.position.z + direction.z);
-        const y = Math.floor(playerDirection.position.y) - 1;
-
-        if(this.world.inBounds(x,z,y)) {
-            return this.world.hasVoxel(x,z,y)
+    
+        let moveVector = new THREE.Vector3();
+    
+        switch (directionType) {
+            case 'forward':
+                moveVector.copy(direction);
+                break;
+            case 'backward':
+                moveVector.copy(direction).negate();
+                break;
+            case 'left':
+                moveVector.crossVectors(direction, playerDirection.up).normalize().negate();
+                break;
+            case 'right':
+                moveVector.crossVectors(direction, playerDirection.up).normalize();
+                break;
+            default:
+                throw new Error('Invalid direction type');
         }
-        return true;
-    }
     
-    canMoveBackward(playerDirection) {
-        const direction = new THREE.Vector3();
-        playerDirection.getWorldDirection(direction);
-        direction.y = 0;
-
-        const x = Math.floor(playerDirection.position.x - direction.x);
-        const z = Math.floor(playerDirection.position.z - direction.z);
+        const x = Math.floor(playerDirection.position.x + moveVector.x);
+        const z = Math.floor(playerDirection.position.z + moveVector.z);
         const y = Math.floor(playerDirection.position.y) - 1;
-
-        if(this.world.inBounds(x,z,y)) {
-            return this.world.hasVoxel(x,z,y)
-        }
-        return true;
-    }
-
-    canMoveLeft(playerDirection) {
-        const direction = new THREE.Vector3();
-        playerDirection.getWorldDirection(direction);
-        direction.y = 0;
     
-        const right = new THREE.Vector3();
-        right.crossVectors(direction, playerDirection.up).normalize();
-    
-        const x = Math.floor(playerDirection.position.x - right.x);
-        const z = Math.floor(playerDirection.position.z - right.z);
-        const y = Math.floor(playerDirection.position.y) - 1;
-        
-        if(this.world.inBounds(x,z,y)) {
-            return this.world.hasVoxel(x,z,y)
-        }
-        return true;
-    }
-    
-    canMoveRight(playerDirection) {
-        const direction = new THREE.Vector3();
-        playerDirection.getWorldDirection(direction);
-        direction.y = 0;
-    
-        const right = new THREE.Vector3();
-        right.crossVectors(direction, playerDirection.up).normalize();
-    
-        const x = Math.floor(playerDirection.position.x + right.x);
-        const z = Math.floor(playerDirection.position.z + right.z);
-        const y = Math.floor(playerDirection.position.y) - 1;
-        
-        if(this.world.inBounds(x,z,y)) {
-            return this.world.hasVoxel(x,z,y)
+        if (this.world.inBounds(x, z, y)) {
+            return this.world.hasVoxel(x, z, y);
         }
         return true;
     }
@@ -287,26 +255,26 @@ export default class Player extends THREE.Group {
 
             let isMoving = false;
 
-            if (this.movement.forward && !this.canMoveForward(this.playerModel)) {
+            if (this.movement.forward && !this.canMove(this.playerModel, 'forward')) {
                 this.playerModel.position.addScaledVector(direction, this.speed);
                 isMoving = true;
             }
-            if (this.movement.backward && !this.canMoveBackward(this.playerModel) ){
+            if (this.movement.backward && !this.canMove(this.playerModel, 'backward')){
                 this.playerModel.position.addScaledVector(direction, -this.speed);
                 isMoving = true;
             }
-            if (this.movement.left && !this.canMoveLeft(this.playerModel)) {
+            if (this.movement.left && !this.canMove(this.playerModel, 'left')) {
                 this.playerModel.position.addScaledVector(right, this.speed);
                 isMoving = true;
             }
-            if (this.movement.right && !this.canMoveRight(this.playerModel)) {
+            if (this.movement.right && !this.canMove(this.playerModel, 'right')) {
                 this.playerModel.position.addScaledVector(right, -this.speed);
                 isMoving = true;
             }
 
             if (this.isJumping) {
                 this.playerModel.position.y += this.jumpVelocity;
-                this.jumpVelocity += this.gravity;
+                this.jumpVelocity += GlobalConfig.gravity;
 
                 const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
                 if (this.playerModel.position.y <= groundHeight + 1.5) {
@@ -337,17 +305,6 @@ export default class Player extends THREE.Group {
         this.dirLightTarget.position.set(this.playerModel.position.x, this.playerModel.position.y, this.playerModel.position.z);
         this.dirLight.position.set(this.playerModel.position.x, this.playerModel.position.y + 50, this.playerModel.position.z + 30);
         this.dirLight.target = this.dirLightTarget;
-    }
-    
-    toggleShadowHelperVisibility() {
-        if (this.dirLightHelper.visible) {
-            this.dirLightHelper.visible = false;
-        } else {
-            this.dirLightHelper.visible = true;
-        }
-    }
-    toggleYInversion(){
-        this.yInverted = !this.yInverted
     }
 
     changeShadowMapVolume(fogValue) {
