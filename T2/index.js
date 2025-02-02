@@ -37,7 +37,6 @@ const { stats } = buildInterface((type, value) => {
     if (type === 'fog') {
         scene.fog.near = value;
         scene.fog.far = value + 30;
-        console.log(value)
         player.changeShadowMapVolume(value)
     }
 });

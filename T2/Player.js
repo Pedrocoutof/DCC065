@@ -309,16 +309,12 @@ export default class Player extends THREE.Group {
 
     changeShadowMapVolume(fogValue) {
         const size = Math.max(Math.min(fogValue, 250), 0);
-        console.log(size)
+    
         this.dirLight.shadow.camera.left = -size;
         this.dirLight.shadow.camera.right = size;
         this.dirLight.shadow.camera.top = size;
         this.dirLight.shadow.camera.bottom = -size;
-
-        if(fogValue > 135) {
-            this.dirLight.shadow.bias = 0.0001;
-        }
-    
+        
         this.dirLight.shadow.camera.updateProjectionMatrix();
         this.dirLightHelper.update();
     }
@@ -337,6 +333,7 @@ export default class Player extends THREE.Group {
         this.dirLight.shadow.camera.top = 20;
         this.dirLight.shadow.camera.bottom = -20;
         this.dirLightHelper = new CameraHelper(this.dirLight.shadow.camera);
+        this.dirLight.shadow.camera.normalBias = 0.0000003;
         this.add(this.dirLightHelper);
     }
 }

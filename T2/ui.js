@@ -17,7 +17,7 @@ export function buildInterface(callback) {
         return stats;
     }
 
-    gui.add(GlobalConfig, 'fogValue', 0, 500).onChange(value => {
+    gui.add(GlobalConfig, 'fogValue', 0, 350).onChange(value => {
         if (callback) callback('fog', value);
     });
 
