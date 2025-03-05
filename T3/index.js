@@ -1,6 +1,6 @@
-import * as THREE from 'three';
-import { OrbitControls } from 'OrbitControls';
-import { initRenderer, initCamera } from 'util';
+import * as THREE from '../../build/three.module.js';
+import { OrbitControls } from '../../build/jsm/controls/OrbitControls.js';
+import { initRenderer, initCamera } from '../../libs/util/util.js';
 import { buildInterface } from 'ui';
 import { World } from 'world';
 import GlobalConfig from "./GlobalConfig.js";
