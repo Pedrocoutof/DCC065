@@ -1,4 +1,4 @@
-import GUI from "../../libs/util/dat.gui.module.js";
+import GUI from "GUI";
 import GlobalConfig from "./GlobalConfig.js";
 import Stats from 'Stats';
 import { InfoBox } from 'util';
