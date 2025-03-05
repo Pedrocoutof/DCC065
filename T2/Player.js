@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { GLTFLoader } from '../../build/jsm/loaders/GLTFLoader.js';
+import { GLTFLoader } from 'GLTFLoader';
 import { CameraHelper } from 'three';
 import GlobalConfig from "./GlobalConfig.js";
 
