@@ -53,7 +53,7 @@ loadModel(x, z, y) {
         new THREE.MeshStandardMaterial({ 
             color: 0x00ff00, 
             transparent: true, // Ativa a transparência
-            opacity: 1 // Define o nível de opacidade (0 é totalmente transparente, 1 é totalmente opaco)
+            opacity: 0 // Define o nível de opacidade (0 é totalmente transparente, 1 é totalmente opaco)
         })
     );
 
@@ -232,9 +232,9 @@ updateCameraRotation(movementX, movementY) {
         if (this.world.inBounds(x, z, y)) {
             const block = this.world.data[x][z][y];
             if (block && block.type === "water") {
-                return false; // Bloco de água: o jogador cai
+                return true; // Ignora colisão com blocos de água
             }
-            return this.world.hasVoxel(x, z, y);
+            return !this.world.hasVoxel(x, z, y); // Verifica colisão com outros blocos
         }
         return true;
     }
@@ -251,19 +251,19 @@ updateCameraRotation(movementX, movementY) {
     
             let isMoving = false;
     
-            if (this.movement.forward && !this.canMove(this.playerModel, 'forward')) {
+            if (this.movement.forward && this.canMove(this.playerModel, 'forward')) {
                 this.playerModel.position.addScaledVector(direction, this.speed);
                 isMoving = true;
             }
-            if (this.movement.backward && !this.canMove(this.playerModel, 'backward')) {
+            if (this.movement.backward && this.canMove(this.playerModel, 'backward')) {
                 this.playerModel.position.addScaledVector(direction, -this.speed);
                 isMoving = true;
             }
-            if (this.movement.left && !this.canMove(this.playerModel, 'left')) {
+            if (this.movement.left && this.canMove(this.playerModel, 'left')) {
                 this.playerModel.position.addScaledVector(right, this.speed);
                 isMoving = true;
             }
-            if (this.movement.right && !this.canMove(this.playerModel, 'right')) {
+            if (this.movement.right && this.canMove(this.playerModel, 'right')) {
                 this.playerModel.position.addScaledVector(right, -this.speed);
                 isMoving = true;
             }
@@ -276,8 +276,8 @@ updateCameraRotation(movementX, movementY) {
             if (this.world.inBounds(x, z, y)) {
                 const block = this.world.data[x][z][y];
                 if (block && block.type === "water") {
-                    // Aplica uma queda gradual
-                    this.playerModel.position.y -= 80; // Velocidade de queda na água
+                    // Mantém o jogador flutuando sobre a água
+                    this.playerModel.position.y = y + 1.5; // Altura fixa sobre a água
                     isMoving = true;
                 }
             }
@@ -295,9 +295,23 @@ updateCameraRotation(movementX, movementY) {
             }
     
             if (!this.isJumping) {
-                const groundHeight = this.world.getHeightByXZ(Math.floor(this.playerModel.position.x), Math.floor(this.playerModel.position.z));
-                if (this.playerModel.position.y > groundHeight + 1.5) {
-                    this.fall();
+                const x = Math.floor(this.playerModel.position.x);
+                const z = Math.floor(this.playerModel.position.z);
+                const y = Math.floor(this.playerModel.position.y) - 1;
+                if (this.world.inBounds(x, z, y)) {
+                    const block = this.world.data[x][z][y];
+                    console.log("Bloco:", block); // Log para depuração
+                    if (block && block.type === "water") {
+                        // Se o bloco abaixo for água, o jogador flutua
+                        this.playerModel.position.y = y + 1.5; // Altura fixa sobre a água
+                        this.fallSpeed = 0; // Reseta a velocidade de queda
+                    } else {
+                        // Se não for água, aplica a lógica de colisão normal
+                        const groundHeight = this.world.getHeightByXZ(x, z);
+                        if (this.playerModel.position.y > groundHeight + 1.5) {
+                            this.fall();
+                        }
+                    }
                 }
             }
     
@@ -311,7 +325,6 @@ updateCameraRotation(movementX, movementY) {
             this.updateCrosshairPosition();
         }
     }
-
     
     
     updateDirLightPosition() {

@@ -2,16 +2,41 @@
 <html lang="pt-br">
 <head>
     <title>Computação Gráfica</title>
-
     <link rel="shortcut icon" href="../favicon.ico">
     <meta name="viewport" content="width=device-width, initial-scale=1">  
     <style>
         body {
             margin: 0;
         }
+
+        /* Estilo da tela de loading */
+        #loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            z-index: 1000;
+        }
+
+        /* Esconde a tela de loading quando o jogo carregar */
+        #loading-screen.hidden {
+            display: none;
+        }
     </style>
 </head>
 <body>
+    <!-- Tela de loading -->
+    <div id="loading-screen">
+        Carregando...
+    </div>
+
     <div id="webgl-output" class="webgl-output"></div>
 
     <script type="importmap">
