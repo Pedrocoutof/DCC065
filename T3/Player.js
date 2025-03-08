@@ -300,7 +300,6 @@ updateCameraRotation(movementX, movementY) {
                 const y = Math.floor(this.playerModel.position.y) - 1;
                 if (this.world.inBounds(x, z, y)) {
                     const block = this.world.data[x][z][y];
-                    console.log("Bloco:", block); // Log para depuração
                     if (block && block.type === "water") {
                         // Se o bloco abaixo for água, o jogador flutua
                         this.playerModel.position.y = y + 1.5; // Altura fixa sobre a água

@@ -567,15 +567,7 @@ export class World extends THREE.Group {
       const materialProps = item.materialProps;
       const additionalData = item.additionalData;
 
-      this.setVoxel(posX, posY, posZ, materialProps.color, additionalData);
     });
-  }
-
-  setVoxel(x, y, z, color, additionalData) {
-    console.log(
-      `Definindo voxel em (${x}, ${y}, ${z}) com cor ${color} e dados adicionais:`,
-      additionalData
-    );
   }
 
   setTreeVoxel(x, y, z, type) {
