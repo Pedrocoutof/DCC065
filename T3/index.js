@@ -133,7 +133,7 @@ async function init() {
     const listener = new THREE.AudioListener();
     const backgroundMusic = new THREE.Audio(listener);
 
-    audioLoader.load('./assets/music.mp3', (buffer) => {
+    audioLoader.load('./assets/Music.mp3', (buffer) => {
         backgroundMusic.setBuffer(buffer);
         backgroundMusic.setLoop(true);
         backgroundMusic.setVolume(0.5);
